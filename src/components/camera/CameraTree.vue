@@ -158,8 +158,7 @@ export const TreeNodeRecursive = defineComponent({
   flex: 0 0 220px;
   width: 220px;
   background: $bg-white;
-  border-radius: $radius-md;
-  border: 1px solid $divider;
+  border-right: 1px solid $divider;
   display: flex;
   flex-direction: column;
   min-height: 0;

@@ -13,6 +13,9 @@ const rows = [
 
 <template>
   <div class="official-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">预警通知</h1>
+    </div>
     <div class="official-card page-card">
       <div class="toolbar-row">
         <a-input-search placeholder="搜索通知规则名称" class="search" />

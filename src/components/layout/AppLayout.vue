@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router';
 import type { RouteLocationMatched } from 'vue-router';
 import PrimarySidebar from './PrimarySidebar.vue';
 import SecondarySidebar from './SecondarySidebar.vue';
-import AppHeader from './AppHeader.vue';
 import {
   PRIMARY_MENU,
   SECONDARY_MENU,
@@ -47,7 +46,6 @@ const secondaryConfig = computed(() => {
     />
     <SecondarySidebar v-if="secondaryConfig" :config="secondaryConfig" />
     <main class="app-main">
-      <AppHeader />
       <div class="app-content">
         <RouterView />
       </div>
@@ -70,7 +68,7 @@ const secondaryConfig = computed(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: linear-gradient(180deg, #fbfcff 0%, #f5f7fb 100%);
+  background: $bg-white;
 }
 
 .app-content {
@@ -78,5 +76,6 @@ const secondaryConfig = computed(() => {
   min-height: 0;
   overflow: hidden;
   display: flex;
+  background: $bg-white;
 }
 </style>

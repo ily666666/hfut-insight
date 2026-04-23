@@ -50,8 +50,7 @@ function openAlarmRecord() {
   flex: 0 0 176px;
   width: 176px;
   background: $bg-white;
-  border-radius: $radius-md;
-  border: 1px solid $divider;
+  border-left: 1px solid $divider;
   display: flex;
   flex-direction: column;
   overflow: hidden;

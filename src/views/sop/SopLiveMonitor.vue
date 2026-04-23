@@ -8,6 +8,9 @@ const alarming = ref(false);
 
 <template>
   <div class="official-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">实时监控</h1>
+    </div>
     <div class="official-card page-card">
       <div class="workspace">
         <aside class="left-panel">

@@ -1,5 +1,8 @@
 <template>
   <div class="official-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">SOP规则</h1>
+    </div>
     <div class="official-card page-card">
       <div class="toolbar-row">
         <a-input-search placeholder="请输入SOP规则名称搜索" class="search" />

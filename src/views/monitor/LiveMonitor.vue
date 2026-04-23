@@ -22,26 +22,45 @@ function handleFullscreen() {
 </script>
 
 <template>
-  <div class="live-monitor">
-    <CameraTree />
+  <div class="live-monitor-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">实时监控</h1>
+    </div>
+    <div class="live-monitor">
+      <CameraTree />
 
-    <section ref="monitorCenterRef" class="camera-center">
-      <CameraToolbar @fullscreen="handleFullscreen" />
-      <CameraGrid />
-    </section>
+      <section ref="monitorCenterRef" class="camera-center">
+        <CameraToolbar @fullscreen="handleFullscreen" />
+        <CameraGrid />
+      </section>
 
-    <AlarmPanel />
+      <AlarmPanel />
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.live-monitor-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: $bg-white;
+}
+
+.official-page-head {
+  flex: 0 0 auto;
+  padding: 20px 24px 16px;
+}
+
 .live-monitor {
   flex: 1;
   display: flex;
   min-height: 0;
-  padding: 12px;
-  gap: 12px;
-  background: transparent;
+  min-width: 0;
+  background: $bg-white;
+  border-top: 1px solid $divider;
 }
 
 .camera-center {
@@ -50,8 +69,6 @@ function handleFullscreen() {
   flex-direction: column;
   min-width: 0;
   background: $bg-white;
-  border-radius: $radius-md;
-  border: 1px solid $divider;
   overflow: hidden;
 }
 </style>

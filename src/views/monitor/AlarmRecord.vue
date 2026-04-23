@@ -81,19 +81,22 @@ onMounted(load);
 <template>
   <div class="alarm-record-page">
     <div class="page-shell">
-      <div class="page-actions-row">
-        <a-button @click="onStatusHelp">
-          <template #icon>
-            <span class="i-mdi-lightbulb-on-outline" />
-          </template>
-          预警状态说明
-        </a-button>
-        <a-button @click="onRejudgeRecords">
-          <template #icon>
-            <span class="i-mdi-scale-balance" />
-          </template>
-          复判记录
-        </a-button>
+      <div class="official-page-head">
+        <h1 class="official-page-title">预警记录</h1>
+        <div class="page-actions-row">
+          <a-button @click="onStatusHelp">
+            <template #icon>
+              <span class="i-mdi-lightbulb-on-outline" />
+            </template>
+            预警状态说明
+          </a-button>
+          <a-button @click="onRejudgeRecords">
+            <template #icon>
+              <span class="i-mdi-scale-balance" />
+            </template>
+            复判记录
+          </a-button>
+        </div>
       </div>
 
       <div class="content-card">
@@ -281,7 +284,7 @@ onMounted(load);
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  background: $bg-base;
+  background: $bg-white;
   overflow: auto;
 }
 
@@ -290,8 +293,12 @@ onMounted(load);
   display: flex;
   flex-direction: column;
   min-height: min-content;
-  padding: 16px;
+  padding: 0 16px 16px;
   gap: 12px;
+}
+
+.official-page-head {
+  padding: 20px 16px 16px;
 }
 
 .page-actions-row {
@@ -304,8 +311,6 @@ onMounted(load);
 
 .content-card {
   background: $bg-white;
-  border: 1px solid $divider;
-  border-radius: $radius-md;
   overflow: hidden;
 }
 

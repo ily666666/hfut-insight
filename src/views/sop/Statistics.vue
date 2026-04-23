@@ -1,5 +1,8 @@
 <template>
   <div class="official-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">SOP统计</h1>
+    </div>
     <div class="official-card page-card">
       <div class="official-filter-panel">
         <div class="filter-row">

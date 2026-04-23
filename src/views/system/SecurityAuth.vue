@@ -34,15 +34,12 @@ function openDoc() {
   min-height: 0;
   min-width: 0;
   overflow: auto;
-  background: $bg-base;
-  padding: 16px;
+  background: $bg-white;
+  padding: 0 16px 16px;
 }
 
 .page-shell {
   background: $bg-white;
-  border: 1px solid $divider;
-  border-radius: $radius-md;
-  box-shadow: $shadow-card;
   min-height: 360px;
 }
 

@@ -14,6 +14,11 @@ const router = useRouter();
 
 const activeKey = computed(() => route.meta.secondary as string | undefined);
 const expandedKeys = ref<Set<string>>(new Set());
+const collapsed = ref(false);
+
+function toggleCollapse() {
+  collapsed.value = !collapsed.value;
+}
 
 function isLeaf(item: SecondaryMenuItem): boolean {
   return !item.children?.length;
@@ -73,39 +78,110 @@ function handleNavigate(item: SecondaryMenuItem) {
 </script>
 
 <template>
-  <aside class="secondary-sidebar">
-    <div class="title">{{ config.title }}</div>
+  <div class="secondary-sidebar-wrap" :class="{ 'is-collapsed': collapsed }">
+    <aside class="secondary-sidebar">
+      <div class="title">{{ config.title }}</div>
 
-    <button v-if="config.contextLabel" class="context-chip" type="button">
-      <span>{{ config.contextLabel }}</span>
-      <Icon icon="mdi:chevron-down" />
+      <button v-if="config.contextLabel" class="context-chip" type="button">
+        <span>{{ config.contextLabel }}</span>
+        <Icon icon="mdi:chevron-down" />
+      </button>
+
+      <ul class="menu" role="menu">
+        <SecondaryMenuTreeNode
+          v-for="item in config.items"
+          :key="item.key"
+          :item="item"
+          :depth="0"
+          :active-key="activeKey"
+          :expanded-keys="expandedKeys"
+          @toggle="toggle"
+          @navigate="handleNavigate"
+        />
+      </ul>
+
+      <div class="footer">{{ config.footerText || '©2026 Power By 百度一见' }}</div>
+    </aside>
+
+    <button
+      class="collapse-toggle"
+      type="button"
+      :title="collapsed ? '展开侧边栏' : '收起侧边栏'"
+      :aria-label="collapsed ? '展开侧边栏' : '收起侧边栏'"
+      @click="toggleCollapse"
+    >
+      <Icon :icon="collapsed ? 'mdi:chevron-right' : 'mdi:chevron-left'" />
     </button>
-
-    <ul class="menu" role="menu">
-      <SecondaryMenuTreeNode
-        v-for="item in config.items"
-        :key="item.key"
-        :item="item"
-        :depth="0"
-        :active-key="activeKey"
-        :expanded-keys="expandedKeys"
-        @toggle="toggle"
-        @navigate="handleNavigate"
-      />
-    </ul>
-
-    <div class="footer">{{ config.footerText || '©2026 Power By 百度一见' }}</div>
-  </aside>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.secondary-sidebar {
+.secondary-sidebar-wrap {
+  position: relative;
   flex: 0 0 214px;
   width: 214px;
   display: flex;
+  min-width: 0;
+  transition: flex-basis 0.25s ease, width 0.25s ease;
+
+  &.is-collapsed {
+    flex-basis: 0;
+    width: 0;
+
+    .secondary-sidebar {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .collapse-toggle {
+      opacity: 1;
+    }
+  }
+
+  &:hover .collapse-toggle {
+    opacity: 1;
+  }
+}
+
+.secondary-sidebar {
+  flex: 1 1 auto;
+  width: 100%;
+  display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
   background: linear-gradient(180deg, #f8faff 0%, #f5f7fb 100%);
   border-right: 1px solid $divider;
+  transition: opacity 0.2s ease;
+}
+
+.collapse-toggle {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid $divider;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: #fff;
+  color: $text-secondary;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  z-index: 20;
+  box-shadow: 2px 0 6px rgba(31, 37, 64, 0.06);
+
+  &:hover {
+    color: $brand-blue;
+    background: #f6f9ff;
+  }
 }
 
 .title {

@@ -7,6 +7,9 @@ const viewMode = ref<'grid' | 'list'>('grid');
 
 <template>
   <div class="official-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">智能复判</h1>
+    </div>
     <div class="official-card page-card">
       <div class="tabs">
         <button

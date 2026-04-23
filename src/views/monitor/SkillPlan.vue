@@ -17,6 +17,9 @@ const rows = ref([
 
 <template>
   <div class="official-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">技能运行计划</h1>
+    </div>
     <div class="official-card page-card">
       <div class="top-row">
         <div class="tabs">

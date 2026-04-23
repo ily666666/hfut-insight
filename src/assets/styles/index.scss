@@ -47,20 +47,16 @@ button {
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  padding: 0 24px 24px;
+  padding: 0 0 24px;
+  background: $bg-white;
 }
 
 .official-card {
   background: #fff;
-  border: 1px solid $divider;
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(31, 37, 64, 0.04);
 }
 
 .official-table-card {
   background: #fff;
-  border: 1px solid $divider;
-  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -70,12 +66,12 @@ button {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  padding: 20px 24px 16px;
 }
 
 .official-page-title {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   color: $text-primary;
 }
@@ -90,8 +86,7 @@ button {
 .official-filter-panel {
   padding: 14px 16px;
   background: #f7f9fc;
-  border: 1px solid #edf1f7;
-  border-radius: 12px;
+  border-radius: 4px;
 }
 
 .official-empty {
@@ -126,7 +121,7 @@ button {
   gap: 14px;
   padding: 12px 16px;
   border: 1px solid $divider;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #fff;
 }
 

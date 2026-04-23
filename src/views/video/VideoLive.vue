@@ -30,6 +30,9 @@ function toggleFullscreen() {
 
 <template>
   <div class="official-page video-live-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">视频监控</h1>
+    </div>
     <div class="monitor-shell official-card">
       <CameraTree />
 

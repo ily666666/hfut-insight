@@ -2,6 +2,8 @@
 import { Icon } from '@iconify/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
+const dashboardRef = ref<HTMLElement | null>(null);
+const isFullscreen = ref(false);
 const now = ref(new Date());
 let timer: number | null = null;
 
@@ -17,6 +19,14 @@ const timeText = computed(() => {
   const seconds = `${value.getSeconds()}`.padStart(2, '0');
   return `${year}-${month}-${day} ${weekdays[value.getDay()]} ${hours}:${minutes}:${seconds}`;
 });
+
+const fullscreenIcon = computed(() =>
+  isFullscreen.value ? 'mdi:fullscreen-exit' : 'mdi:fullscreen',
+);
+
+const fullscreenTitle = computed(() =>
+  isFullscreen.value ? '退出全屏' : '全屏',
+);
 
 const equipmentStats = [
   { icon: 'mdi:monitor-dashboard', label: '设备总数', value: '1个' },
@@ -44,27 +54,41 @@ const orgRanks = [
   { label: '865278304a', value: 1 },
 ];
 
+function syncFullscreen() {
+  isFullscreen.value = document.fullscreenElement === dashboardRef.value;
+}
+
 async function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    await document.documentElement.requestFullscreen?.();
+  if (!dashboardRef.value) return;
+
+  if (document.fullscreenElement === dashboardRef.value) {
+    await document.exitFullscreen?.();
     return;
   }
-  await document.exitFullscreen?.();
+
+  await dashboardRef.value.requestFullscreen?.();
 }
 
 onMounted(() => {
   timer = window.setInterval(() => {
     now.value = new Date();
   }, 1000);
+
+  document.addEventListener('fullscreenchange', syncFullscreen);
+  syncFullscreen();
 });
 
 onBeforeUnmount(() => {
   if (timer) window.clearInterval(timer);
+  document.removeEventListener('fullscreenchange', syncFullscreen);
 });
 </script>
 
 <template>
-  <div class="dashboard-screen">
+  <div
+    ref="dashboardRef"
+    :class="['dashboard-screen', { 'is-fullscreen': isFullscreen }]"
+  >
     <div class="dashboard-backdrop" />
 
     <header class="screen-header">
@@ -80,8 +104,8 @@ onBeforeUnmount(() => {
         <button class="action-btn" type="button" title="设置">
           <Icon icon="mdi:cog-outline" />
         </button>
-        <button class="action-btn" type="button" title="全屏" @click="toggleFullscreen">
-          <Icon icon="mdi:fullscreen" />
+        <button class="action-btn" type="button" :title="fullscreenTitle" @click="toggleFullscreen">
+          <Icon :icon="fullscreenIcon" />
         </button>
       </div>
     </header>
@@ -280,7 +304,8 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .dashboard-screen {
   position: relative;
-  width: 100vw;
+  width: 100%;
+  min-height: 100vh;
   height: 100vh;
   overflow: hidden;
   padding: 20px 36px 24px;
@@ -288,6 +313,25 @@ onBeforeUnmount(() => {
     radial-gradient(circle at 50% 0%, rgba(35, 92, 210, 0.3), transparent 24%),
     linear-gradient(180deg, #050b17 0%, #081225 45%, #06111f 100%);
   color: #fff;
+}
+
+.dashboard-screen.is-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 16px 28px 20px;
+}
+
+.dashboard-screen.is-fullscreen .screen-grid {
+  height: calc(100% - 72px);
+}
+
+.dashboard-screen.is-fullscreen .screen-time {
+  font-size: 22px;
+}
+
+.dashboard-screen.is-fullscreen .screen-title {
+  font-size: 28px;
 }
 
 .dashboard-backdrop {
@@ -340,7 +384,14 @@ onBeforeUnmount(() => {
   position: relative;
   display: block;
   background:
-    linear-gradient(90deg, transparent 0%, rgba(42, 133, 255, 0.2) 20%, rgba(63, 182, 255, 0.95) 50%, rgba(42, 133, 255, 0.2) 80%, transparent 100%);
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(42, 133, 255, 0.2) 20%,
+      rgba(63, 182, 255, 0.95) 50%,
+      rgba(42, 133, 255, 0.2) 80%,
+      transparent 100%
+    );
   clip-path: polygon(0 50%, 8% 50%, 12% 0, 88% 0, 92% 50%, 100% 50%, 92% 100%, 8% 100%);
   box-shadow: 0 0 20px rgba(59, 162, 255, 0.28);
 }
@@ -366,15 +417,18 @@ onBeforeUnmount(() => {
 }
 
 .screen-grid {
-  height: calc(100vh - 86px);
+  height: calc(100% - 86px);
   display: grid;
-  grid-template-columns: 440px minmax(0, 1fr) 440px;
-  grid-template-rows: 265px 270px 270px;
+  grid-template-columns: minmax(320px, 23.8%) minmax(0, 1fr) minmax(320px, 23.8%);
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
 
 .dashboard-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border-radius: 18px;
   padding: 16px 20px 20px;
   background:
@@ -386,22 +440,25 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
-.dashboard-card::before {
-  content: '';
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  top: 46px;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(43, 179, 255, 0.9), rgba(43, 179, 255, 0.08));
-  box-shadow: 0 0 10px rgba(43, 179, 255, 0.2);
-}
-
 .card-head {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(43, 179, 255, 0.9), rgba(43, 179, 255, 0.08));
+    box-shadow: 0 0 10px rgba(43, 179, 255, 0.2);
+  }
 
   h2 {
     margin: 0;
@@ -472,13 +529,17 @@ onBeforeUnmount(() => {
 }
 
 .stat-grid {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  align-content: start;
+  padding-bottom: 6px;
 }
 
 .stat-item {
-  min-height: 82px;
+  min-height: 0;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -513,13 +574,17 @@ onBeforeUnmount(() => {
 }
 
 .event-panel {
-  height: calc(100% - 54px);
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  padding-bottom: 4px;
 }
 
 .event-preview {
   flex: 1;
+  min-height: 0;
   border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(23, 37, 69, 0.92) 0%, rgba(10, 18, 35, 0.96) 100%);
@@ -579,21 +644,26 @@ onBeforeUnmount(() => {
 }
 
 .event-thumbs {
-  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .thumb-item {
-  height: 76px;
+  height: clamp(54px, 8vh, 76px);
   border-radius: 10px;
   background: linear-gradient(180deg, rgba(17, 37, 85, 0.95), rgba(10, 20, 47, 0.95));
   border: 1px solid rgba(53, 122, 214, 0.28);
 }
 
 .record-table {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   font-size: 14px;
+  padding-bottom: 6px;
 }
 
 .record-head,
@@ -614,11 +684,13 @@ onBeforeUnmount(() => {
 .record-row {
   padding: 12px 14px;
   color: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(61, 126, 219, 0.12);
 }
 
 .tab-strip {
   display: flex;
   justify-content: flex-end;
+  flex-shrink: 0;
   gap: 8px;
   margin-top: -6px;
   margin-bottom: 12px;
@@ -644,15 +716,18 @@ onBeforeUnmount(() => {
 }
 
 .ring-panel {
+  flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   gap: 20px;
-  height: calc(100% - 72px);
+  padding: 6px 0 12px;
 }
 
 .ring-chart {
   width: 150px;
   height: 150px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: conic-gradient(#3c84ff 0turn 1turn, rgba(255, 255, 255, 0.08) 1turn);
   padding: 14px;
@@ -687,8 +762,10 @@ onBeforeUnmount(() => {
 .ring-legend,
 .level-legend {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 14px;
 }
 
@@ -732,10 +809,14 @@ onBeforeUnmount(() => {
 }
 
 .rank-list {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 20px;
   margin-top: 6px;
+  padding: 6px 0 12px;
 }
 
 .rank-row {
@@ -770,11 +851,13 @@ onBeforeUnmount(() => {
 }
 
 .empty-rank {
-  height: calc(100% - 76px);
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 12px;
 }
 
 @media (max-width: 1680px) {
-  .dashboard-screen {
+  .dashboard-screen:not(.is-fullscreen) {
     overflow: auto;
     min-width: 1440px;
   }

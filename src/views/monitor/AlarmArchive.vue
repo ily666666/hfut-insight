@@ -20,6 +20,9 @@ const rows = ref([
 
 <template>
   <div class="official-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">预警档案</h1>
+    </div>
     <div class="official-card page-card">
       <div class="toolbar-row">
         <div class="official-toolbar">
