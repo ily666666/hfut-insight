@@ -17,3 +17,5 @@ dist-ssr
 # capture tool outputs
 tools/capture/node_modules
 tools/capture/output
+/capture/
+/capture2/
