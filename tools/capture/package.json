@@ -1,0 +1,12 @@
+{
+  "name": "yijian-capture",
+  "version": "1.0.0",
+  "private": true,
+  "description": "本地采集百度一见 · 监控中心摄像头页面的真实 DOM 与截图，供页面仿真参考。",
+  "scripts": {
+    "capture": "node capture.js"
+  },
+  "dependencies": {
+    "playwright": "^1.47.2"
+  }
+}

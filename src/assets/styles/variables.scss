@@ -1,0 +1,53 @@
+// =========================================================
+// 设计变量：按一见平台真实配色 / ACUD 规范整理
+// =========================================================
+
+// 品牌色
+$brand-blue: #2468f2;
+$brand-blue-hover: #4c87ff;
+$brand-blue-pressed: #1d57d2;
+$brand-blue-bg: rgba(36, 104, 242, 0.08);
+$brand-blue-bg-strong: rgba(36, 104, 242, 0.14);
+
+// 语义色
+$color-success: #30bf13;
+$color-warning: #ff9326;
+$color-danger: #f33e3e;
+
+// 文本
+$text-primary: #1f2540;
+$text-regular: #3d4566;
+$text-secondary: #6b7599;
+$text-placeholder: #a9b4cc;
+
+// 分隔 / 背景
+$divider: #e8ebf2;
+$divider-strong: #dfe3ec;
+$bg-base: #f4f6fb;
+$bg-white: #ffffff;
+
+// 一级侧边栏
+$sider-primary-bg: #f5f7fc;
+$sider-primary-bg-2: #ffffff;
+$sider-primary-text: #5f6c8c;
+$sider-primary-text-active: #2468f2;
+$sider-primary-active-bg: #ffffff;
+
+// 二级侧边栏
+$sider-secondary-bg: #f7f8fc;
+$sider-secondary-bg-gradient: linear-gradient(180deg, #f7f8fc 0%, #f6f8fb 100%);
+$sider-secondary-text: #4b587c;
+$sider-secondary-text-active: #2468f2;
+$sider-secondary-active-bg: #ffffff;
+
+// 视频墙
+$video-bg: #0f1832;
+$video-bg-2: #121b36;
+$video-grid-bg: #ffffff;
+
+// 圆角 / 阴影
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+$shadow-card: 0 1px 2px rgba(31, 37, 64, 0.04);
+$shadow-raised: 0 8px 20px rgba(31, 37, 64, 0.08);
