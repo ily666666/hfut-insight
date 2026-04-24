@@ -1,4 +1,4 @@
-export type PlatformKey = 'visual' | 'skill';
+export type PlatformKey = 'vision' | 'studio';
 
 export interface PrimaryMenuItem {
   key: string;

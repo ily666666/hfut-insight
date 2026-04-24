@@ -5,7 +5,7 @@
 - 视觉应用平台
 - 技能开发平台
 
-这次版本已经完成目录重构，代码组织从“顶层混合堆放”调整为“共享层 + 平台层”结构。现有 URL、路由名、页面行为和主要布局交互保持不变，但代码归属已经更清晰，方便后续继续迭代。
+这次版本已经完成目录重构，代码组织从“顶层混合堆放”调整为“共享层 + 平台层”结构。当前两套平台在代码归属和访问路径上都已经明确区分：视觉平台统一收口到 `/vision/*`，技能平台统一收口到 `/studio/*`。
 
 ## 技术栈
 
@@ -68,7 +68,7 @@ hfut-insight/
 │  ├─ assets/                      # 全局样式、图片等静态资源
 │  ├─ router/
 │  │  ├─ index.ts                  # Vue Router 创建入口
-│  │  └─ routes.ts                 # 总路由装配：shared + visual + skill
+│  │  └─ routes.ts                 # 总路由装配：shared + vision + studio
 │  ├─ shared/                      # 共享层：真正跨平台复用的代码
 │  │  ├─ api/                      # 通用请求封装、系统管理接口
 │  │  ├─ components/
@@ -83,7 +83,7 @@ hfut-insight/
 │  │  ├─ navigation.ts             # 共享导航装配
 │  │  └─ routes.ts                 # 共享路由
 │  ├─ platforms/
-│  │  ├─ visual/                   # 视觉应用平台
+│  │  ├─ vision/                   # 视觉应用平台
 │  │  │  ├─ api/
 │  │  │  ├─ components/
 │  │  │  ├─ composables/
@@ -98,7 +98,7 @@ hfut-insight/
 │  │  │  │  └─ asset/
 │  │  │  ├─ navigation.ts
 │  │  │  └─ routes.ts
-│  │  └─ skill/                    # 技能开发平台
+│  │  └─ studio/                   # 技能开发平台
 │  │     ├─ constants/
 │  │     ├─ types/
 │  │     ├─ views/
@@ -128,7 +128,7 @@ hfut-insight/
 
 如果一个页面、组件、接口或状态只服务于某个平台，就不要放进 `shared`。
 
-### 2. 视觉应用平台 `src/platforms/visual`
+### 2. 视觉应用平台 `src/platforms/vision`
 
 视觉平台相关代码已经全部下沉到平台目录，当前按业务域继续划分：
 
@@ -140,7 +140,7 @@ hfut-insight/
 
 视觉平台自己的 API、Store、Composables、类型声明和演示数据也统一归位到这个目录下面。
 
-### 3. 技能开发平台 `src/platforms/skill`
+### 3. 技能开发平台 `src/platforms/studio`
 
 技能平台目前主要承载：
 
@@ -157,8 +157,8 @@ hfut-insight/
 `src/router/routes.ts` 现在只负责做路由聚合：
 
 - `sharedRoutes`
-- `visualRoutes`
-- `skillRoutes`
+- `visionRoutes`
+- `studioRoutes`
 - `NotFound`
 
 这样做的好处是，平台边界更清晰，新增业务时只需要在对应平台内部扩展即可，不需要继续把所有路由都堆到一个总文件里。
@@ -167,14 +167,16 @@ hfut-insight/
 
 当前保留的主要访问路径如下：
 
-- 视觉平台：`/monitor`、`/video`、`/sop`、`/analysis`、`/asset`、`/system`
-- 技能平台：`/skill/explore`、`/skill/workspace`、`/skill/lake`、`/skill/system`
+- 视觉平台：`/vision/monitor`、`/vision/video`、`/vision/sop`、`/vision/analysis`、`/vision/asset`、`/vision/system`
+- 技能平台：`/studio/explore`、`/studio/workspace`、`/studio/lake`、`/studio/system`
 - 共享页面：`/task-center`
 
 说明：
 
-- 这次重构没有改变现有 URL 结构。
-- `/system/*` 与 `/skill/system/*` 仍然同时存在，但页面实现复用 `shared/views/system`。
+- 这次调整统一了平台 URL 前缀。
+- 平台区分同时体现在路由文件拆分、`meta.platform` 字段和 URL 前缀上。
+- 视觉平台使用统一的 `/vision/*` 前缀，技能平台使用统一的 `/studio/*` 前缀。
+- `/vision/system/*` 与 `/studio/system/*` 页面实现都复用 `shared/views/system`。
 
 ## 开发约定
 

@@ -6,7 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const CHANNEL_DRAG_TYPE: typeof import('../platforms/visual/composables/useDragChannel')['CHANNEL_DRAG_TYPE']
+  const CHANNEL_DRAG_TYPE: typeof import('../platforms/vision/composables/useDragChannel')['CHANNEL_DRAG_TYPE']
   const EffectScope: typeof import('vue')['EffectScope']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
@@ -122,7 +122,7 @@ declare global {
   const unrefElement: typeof import('@vueuse/core')['unrefElement']
   const until: typeof import('@vueuse/core')['until']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
-  const useAlarmStore: typeof import('../platforms/visual/stores/alarm')['useAlarmStore']
+  const useAlarmStore: typeof import('../platforms/vision/stores/alarm')['useAlarmStore']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
   const useArrayDifference: typeof import('@vueuse/core')['useArrayDifference']
   const useArrayEvery: typeof import('@vueuse/core')['useArrayEvery']
@@ -168,7 +168,7 @@ declare global {
   const useDevicesList: typeof import('@vueuse/core')['useDevicesList']
   const useDisplayMedia: typeof import('@vueuse/core')['useDisplayMedia']
   const useDocumentVisibility: typeof import('@vueuse/core')['useDocumentVisibility']
-  const useDragChannel: typeof import('../platforms/visual/composables/useDragChannel')['useDragChannel']
+  const useDragChannel: typeof import('../platforms/vision/composables/useDragChannel')['useDragChannel']
   const useDraggable: typeof import('@vueuse/core')['useDraggable']
   const useDropZone: typeof import('@vueuse/core')['useDropZone']
   const useElementBounding: typeof import('@vueuse/core')['useElementBounding']
@@ -208,7 +208,7 @@ declare global {
   const useMemoize: typeof import('@vueuse/core')['useMemoize']
   const useMemory: typeof import('@vueuse/core')['useMemory']
   const useModel: typeof import('vue')['useModel']
-  const useMonitorStore: typeof import('../platforms/visual/stores/monitor')['useMonitorStore']
+  const useMonitorStore: typeof import('../platforms/vision/stores/monitor')['useMonitorStore']
   const useMounted: typeof import('@vueuse/core')['useMounted']
   const useMouse: typeof import('@vueuse/core')['useMouse']
   const useMouseInElement: typeof import('@vueuse/core')['useMouseInElement']
@@ -253,7 +253,7 @@ declare global {
   const useStepper: typeof import('@vueuse/core')['useStepper']
   const useStorage: typeof import('@vueuse/core')['useStorage']
   const useStorageAsync: typeof import('@vueuse/core')['useStorageAsync']
-  const useStreamPlayer: typeof import('../platforms/visual/composables/useStreamPlayer')['useStreamPlayer']
+  const useStreamPlayer: typeof import('../platforms/vision/composables/useStreamPlayer')['useStreamPlayer']
   const useStyleTag: typeof import('@vueuse/core')['useStyleTag']
   const useSupported: typeof import('@vueuse/core')['useSupported']
   const useSwipe: typeof import('@vueuse/core')['useSwipe']
@@ -319,7 +319,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
-    readonly CHANNEL_DRAG_TYPE: UnwrapRef<typeof import('../platforms/visual/composables/useDragChannel')['CHANNEL_DRAG_TYPE']>
+    readonly CHANNEL_DRAG_TYPE: UnwrapRef<typeof import('../platforms/vision/composables/useDragChannel')['CHANNEL_DRAG_TYPE']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
@@ -435,7 +435,7 @@ declare module 'vue' {
     readonly unrefElement: UnwrapRef<typeof import('@vueuse/core')['unrefElement']>
     readonly until: UnwrapRef<typeof import('@vueuse/core')['until']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
-    readonly useAlarmStore: UnwrapRef<typeof import('../platforms/visual/stores/alarm')['useAlarmStore']>
+    readonly useAlarmStore: UnwrapRef<typeof import('../platforms/vision/stores/alarm')['useAlarmStore']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>
     readonly useArrayEvery: UnwrapRef<typeof import('@vueuse/core')['useArrayEvery']>
@@ -481,7 +481,7 @@ declare module 'vue' {
     readonly useDevicesList: UnwrapRef<typeof import('@vueuse/core')['useDevicesList']>
     readonly useDisplayMedia: UnwrapRef<typeof import('@vueuse/core')['useDisplayMedia']>
     readonly useDocumentVisibility: UnwrapRef<typeof import('@vueuse/core')['useDocumentVisibility']>
-    readonly useDragChannel: UnwrapRef<typeof import('../platforms/visual/composables/useDragChannel')['useDragChannel']>
+    readonly useDragChannel: UnwrapRef<typeof import('../platforms/vision/composables/useDragChannel')['useDragChannel']>
     readonly useDraggable: UnwrapRef<typeof import('@vueuse/core')['useDraggable']>
     readonly useDropZone: UnwrapRef<typeof import('@vueuse/core')['useDropZone']>
     readonly useElementBounding: UnwrapRef<typeof import('@vueuse/core')['useElementBounding']>
@@ -521,7 +521,7 @@ declare module 'vue' {
     readonly useMemoize: UnwrapRef<typeof import('@vueuse/core')['useMemoize']>
     readonly useMemory: UnwrapRef<typeof import('@vueuse/core')['useMemory']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
-    readonly useMonitorStore: UnwrapRef<typeof import('../platforms/visual/stores/monitor')['useMonitorStore']>
+    readonly useMonitorStore: UnwrapRef<typeof import('../platforms/vision/stores/monitor')['useMonitorStore']>
     readonly useMounted: UnwrapRef<typeof import('@vueuse/core')['useMounted']>
     readonly useMouse: UnwrapRef<typeof import('@vueuse/core')['useMouse']>
     readonly useMouseInElement: UnwrapRef<typeof import('@vueuse/core')['useMouseInElement']>
@@ -566,7 +566,7 @@ declare module 'vue' {
     readonly useStepper: UnwrapRef<typeof import('@vueuse/core')['useStepper']>
     readonly useStorage: UnwrapRef<typeof import('@vueuse/core')['useStorage']>
     readonly useStorageAsync: UnwrapRef<typeof import('@vueuse/core')['useStorageAsync']>
-    readonly useStreamPlayer: UnwrapRef<typeof import('../platforms/visual/composables/useStreamPlayer')['useStreamPlayer']>
+    readonly useStreamPlayer: UnwrapRef<typeof import('../platforms/vision/composables/useStreamPlayer')['useStreamPlayer']>
     readonly useStyleTag: UnwrapRef<typeof import('@vueuse/core')['useStyleTag']>
     readonly useSupported: UnwrapRef<typeof import('@vueuse/core')['useSupported']>
     readonly useSwipe: UnwrapRef<typeof import('@vueuse/core')['useSwipe']>

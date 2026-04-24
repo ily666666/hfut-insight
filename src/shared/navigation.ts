@@ -1,11 +1,11 @@
 import {
-  visualPrimaryMenu,
-  visualSecondaryMenu,
-} from '@/platforms/visual/navigation';
+  visionPrimaryMenu,
+  visionSecondaryMenu,
+} from '@/platforms/vision/navigation';
 import {
-  skillPrimaryMenu,
-  skillSecondaryMenu,
-} from '@/platforms/skill/navigation';
+  studioPrimaryMenu,
+  studioSecondaryMenu,
+} from '@/platforms/studio/navigation';
 import type {
   PlatformKey,
   PrimaryMenuItem,
@@ -21,35 +21,35 @@ export type {
 } from '@/shared/types/navigation';
 
 export const PLATFORM_LABEL: Record<PlatformKey, string> = {
-  visual: '视觉应用平台',
-  skill: '技能开发平台',
+  vision: '视觉应用平台',
+  studio: '技能开发平台',
 };
 
 export const PLATFORM_SWITCH: Record<
   PlatformKey,
   { title: string; route: string; icon: string }
 > = {
-  visual: {
+  vision: {
     title: '切换到技能开发平台',
-    route: '/skill/explore/skills',
+    route: '/studio/explore/skills',
     icon: 'mdi:swap-horizontal',
   },
-  skill: {
+  studio: {
     title: '切换到视觉应用平台',
-    route: '/monitor/camera',
+    route: '/vision/monitor/camera',
     icon: 'mdi:swap-horizontal',
   },
 };
 
 export const PRIMARY_MENU: Record<PlatformKey, PrimaryMenuItem[]> = {
-  visual: visualPrimaryMenu,
-  skill: skillPrimaryMenu,
+  vision: visionPrimaryMenu,
+  studio: studioPrimaryMenu,
 };
 
 export const SECONDARY_MENU: Record<
   PlatformKey,
   Record<string, SecondaryMenuConfig>
 > = {
-  visual: visualSecondaryMenu,
-  skill: skillSecondaryMenu,
+  vision: visionSecondaryMenu,
+  studio: studioSecondaryMenu,
 };

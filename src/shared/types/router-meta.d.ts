@@ -4,7 +4,7 @@ import type { PlatformKey } from '@/shared/types/navigation';
 import type {
   SkillCatalogConfig,
   SkillTableConfig,
-} from '@/platforms/skill/constants/skill-pages';
+} from '@/platforms/studio/constants/skill-pages';
 
 declare module 'vue-router' {
   interface RouteMeta {

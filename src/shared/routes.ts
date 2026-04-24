@@ -4,11 +4,11 @@ const AppLayout = () => import('@/shared/components/layout/AppLayout.vue');
 const TaskCenterPage = () => import('@/shared/views/common/TaskCenterPage.vue');
 
 export const sharedRoutes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/monitor/camera' },
+  { path: '/', redirect: '/vision/monitor/camera' },
   {
     path: '/task-center',
     component: AppLayout,
-    meta: { hideSecondary: true, platform: 'visual' },
+    meta: { hideSecondary: true, platform: 'vision' },
     children: [
       {
         path: '',

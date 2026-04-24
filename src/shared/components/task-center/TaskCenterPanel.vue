@@ -49,10 +49,10 @@ const statusTabs: Array<{
 ];
 
 const currentPlatform = computed<PlatformKey>(() => {
-  if (route.meta.platform === 'skill' || route.path.startsWith('/skill')) {
-    return 'skill';
+  if (route.meta.platform === 'studio' || route.path.startsWith('/studio')) {
+    return 'studio';
   }
-  return 'visual';
+  return 'vision';
 });
 
 const moduleOptions = computed(() => [

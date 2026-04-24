@@ -16,9 +16,9 @@ const route = useRoute();
 const platform = computed<PlatformKey>(() => {
   const rec = route.matched.find(
     (item: RouteLocationMatched) =>
-      item.meta.platform === 'visual' || item.meta.platform === 'skill',
+      item.meta.platform === 'vision' || item.meta.platform === 'studio',
   );
-  return (rec?.meta.platform as PlatformKey) || (route.path.startsWith('/skill') ? 'skill' : 'visual');
+  return (rec?.meta.platform as PlatformKey) || (route.path.startsWith('/studio') ? 'studio' : 'vision');
 });
 
 const primaryKey = computed(() => {

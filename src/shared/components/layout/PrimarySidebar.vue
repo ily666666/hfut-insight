@@ -20,7 +20,7 @@ const router = useRouter();
 const taskCenterStore = useTaskCenterStore();
 
 const switchConfig = computed(() => PLATFORM_SWITCH[props.platform]);
-const platformMark = computed(() => (props.platform === 'skill' ? 'S' : 'V'));
+const platformMark = computed(() => (props.platform === 'studio' ? 'S' : 'V'));
 
 function go(item: PrimaryMenuItem) {
   router.push(item.defaultRoute).catch(() => {});

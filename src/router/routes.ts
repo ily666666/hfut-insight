@@ -1,12 +1,12 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { skillRoutes } from '@/platforms/skill/routes';
-import { visualRoutes } from '@/platforms/visual/routes';
+import { studioRoutes } from '@/platforms/studio/routes';
+import { visionRoutes } from '@/platforms/vision/routes';
 import { sharedRoutes } from '@/shared/routes';
 
 export const routes: RouteRecordRaw[] = [
   ...sharedRoutes,
-  ...visualRoutes,
-  ...skillRoutes,
+  ...visionRoutes,
+  ...studioRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',

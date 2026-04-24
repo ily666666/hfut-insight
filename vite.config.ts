@@ -19,8 +19,8 @@ export default defineConfig(({ mode }) => {
         dts: 'src/types/auto-imports.d.ts',
         dirs: [
           'src/shared/stores',
-          'src/platforms/visual/stores',
-          'src/platforms/visual/composables',
+          'src/platforms/vision/stores',
+          'src/platforms/vision/composables',
         ],
         vueTemplate: true,
       }),
@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
         ],
         dirs: [
           'src/shared/components',
-          'src/platforms/visual/components',
+          'src/platforms/vision/components',
         ],
         dts: 'src/types/components.d.ts',
       }),
