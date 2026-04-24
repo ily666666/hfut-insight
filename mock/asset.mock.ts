@@ -13,7 +13,7 @@ export default defineMock([
           {
             id: 'd1',
             name: '体验网关-01',
-            orgName: '865278304a',
+            orgName: '123456789',
             status: '在线',
             model: 'HFUT-GW',
             lastOnline: '2026-04-23 09:00:00',

@@ -17,7 +17,11 @@ export default defineConfig(({ mode }) => {
       AutoImport({
         imports: ['vue', 'vue-router', 'pinia', '@vueuse/core'],
         dts: 'src/types/auto-imports.d.ts',
-        dirs: ['src/composables', 'src/stores'],
+        dirs: [
+          'src/shared/stores',
+          'src/platforms/visual/stores',
+          'src/platforms/visual/composables',
+        ],
         vueTemplate: true,
       }),
       Components({
@@ -26,7 +30,10 @@ export default defineConfig(({ mode }) => {
             importStyle: false, // 使用 reset.css 自行处理
           }),
         ],
-        dirs: ['src/components'],
+        dirs: [
+          'src/shared/components',
+          'src/platforms/visual/components',
+        ],
         dts: 'src/types/components.d.ts',
       }),
       mockDevServerPlugin({

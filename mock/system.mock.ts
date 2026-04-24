@@ -19,7 +19,7 @@ export default defineMock([
       data: [
         {
           id: 'org-root',
-          name: '865278304a',
+          name: '123456789',
           parentId: null,
           children: [
             {

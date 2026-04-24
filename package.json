@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "一见·视觉应用平台 监控中心 前端仿真（Vue 3 + TypeScript + Vite）",
+  "description": "识界·视觉应用平台 监控中心 前端仿真（Vue 3 + TypeScript + Vite）",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",

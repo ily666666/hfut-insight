@@ -7,7 +7,7 @@ const router = createRouter({
 });
 
 router.afterEach((to) => {
-  const base = import.meta.env.VITE_APP_TITLE || '一见·视觉应用平台';
+  const base = import.meta.env.VITE_APP_TITLE || '识界·视觉应用平台';
   document.title = to.meta.title ? `${to.meta.title} - ${base}` : base;
 });
 

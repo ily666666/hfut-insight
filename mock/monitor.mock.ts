@@ -9,15 +9,15 @@ export default defineMock([
       message: 'ok',
       data: [
         {
-          id: 'org-865278304a',
-          name: '865278304a',
+          id: 'org-123456789',
+          name: '123456789',
           parentId: null,
           children: [
             {
               id: 'ch-1',
               name: '体验套餐-模拟通道',
               status: 'Connected',
-              parentId: 'org-865278304a',
+              parentId: 'org-123456789',
               thumbnail: '/assets/forklift.svg',
               streamUrl:
                 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
