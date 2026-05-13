@@ -32,3 +32,28 @@ export interface AlarmArchiveEntry {
   duration?: string;
   thumbnail?: string;
 }
+
+/** 预警档案卡片（视觉化档案管理） */
+export interface AlarmArchiveCard {
+  id: string;
+  name: string;
+  description?: string;
+  cover?: string;
+  alarmCount: number;
+  rangeStart: string;
+  rangeEnd: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 档案内已归集的预警项 */
+export interface AlarmArchiveItem {
+  id: string;
+  alarmName: string;
+  thumbnail?: string;
+  disposeResult: string;
+  pointName: string;
+  alarmTime: string;
+  duration: string;
+  level: AlarmLevel;
+}

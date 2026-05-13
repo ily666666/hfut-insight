@@ -1,5 +1,6 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { message } from 'ant-design-vue';
 import type { TreeProps } from 'ant-design-vue';
 import { fetchSystemOrgMembers, fetchSystemOrgTree } from '@/shared/api';
 import type { SystemOrgMemberRow, SystemOrgNode } from '@/shared/types/system';
@@ -10,16 +11,26 @@ const treeData = ref<TreeProps['treeData']>([]);
 const rawTree = ref<SystemOrgNode[]>([]);
 const selectedKeys = ref<string[]>([]);
 const selectedOrgId = ref<string | null>(null);
+const orgDrawerOpen = ref(false);
+const transferOpen = ref(false);
 
 const members = ref<SystemOrgMemberRow[]>([]);
 const total = ref(0);
 const page = ref(1);
 const pageSize = ref(10);
 
+const orgGuides = [
+  { title: '五级组织结构', desc: '左侧组织树支持创建子组织，最多可维护五级组织层级。' },
+  { title: '组织详情', desc: '选中组织后查看组织详情、成员列表、成员角色和职位。' },
+  { title: '成员更换组织', desc: '支持单个或批量为组织成员更换组织，数据权限随组织范围调整。' },
+];
+
 const columns = [
   { title: '成员', dataIndex: 'displayName', key: 'displayName' },
   { title: '登录名', dataIndex: 'loginName', key: 'loginName' },
+  { title: '职位', dataIndex: 'position', key: 'position' },
   { title: '角色', dataIndex: 'role', key: 'role' },
+  { title: '操作', key: 'action', width: 140 },
 ];
 
 function mapTree(nodes: SystemOrgNode[]): TreeProps['treeData'] {
@@ -86,6 +97,14 @@ function onSelect(keys: (string | number)[]) {
   page.value = 1;
 }
 
+function onCreateOrg() {
+  orgDrawerOpen.value = true;
+}
+
+function onTransfer() {
+  transferOpen.value = true;
+}
+
 watch(selectedOrgId, () => {
   void loadMembers();
 });
@@ -100,8 +119,19 @@ onMounted(async () => {
   <div class="biz-page">
     <div class="page-shell">
       <header class="page-head">
-        <h1 class="page-title">组织</h1>
+        <div>
+          <h1 class="page-title">组织</h1>
+          <p class="page-desc">视觉应用平台和技能开发平台共享组织结构，组织范围影响角色的数据权限。</p>
+        </div>
+        <a-button type="primary" @click="onCreateOrg">添加子组织</a-button>
       </header>
+
+      <section class="guide-grid">
+        <article v-for="item in orgGuides" :key="item.title" class="guide-card">
+          <strong>{{ item.title }}</strong>
+          <p>{{ item.desc }}</p>
+        </article>
+      </section>
 
       <div class="split">
         <aside class="tree-panel">
@@ -119,10 +149,14 @@ onMounted(async () => {
         </aside>
         <div class="main">
           <div class="detail-head">
-            <div class="detail-title">
-              {{ selectedOrgName || '请选择组织' }}
+            <div>
+              <div class="detail-title">{{ selectedOrgName || '请选择组织' }}</div>
+              <div class="muted">组织详情与成员列表，支持批量更换组织。</div>
             </div>
-            <div class="muted">成员列表（仿真）</div>
+            <a-space>
+              <a-button @click="loadMembers">刷新成员</a-button>
+              <a-button @click="onTransfer">更换组织</a-button>
+            </a-space>
           </div>
           <a-table
             :columns="columns"
@@ -132,6 +166,14 @@ onMounted(async () => {
             :pagination="false"
             size="middle"
           >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'role'">
+                <a-tag color="blue">{{ record.role }}</a-tag>
+              </template>
+              <template v-else-if="column.key === 'action'">
+                <a-space><a @click="onTransfer">更换组织</a><a @click="message.info('查看成员详情（仿真）')">详情</a></a-space>
+              </template>
+            </template>
             <template #emptyText>
               <a-empty description="该组织暂无成员" />
             </template>
@@ -148,6 +190,27 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+
+    <a-drawer v-model:open="orgDrawerOpen" title="添加子组织" width="560">
+      <a-form layout="vertical">
+        <a-form-item label="组织名称"><a-input placeholder="请输入组织名称" /></a-form-item>
+        <a-form-item label="上级组织"><a-tree-select :value="selectedOrgName" placeholder="默认为当前选中组织" /></a-form-item>
+        <a-alert type="info" show-icon message="最多可创建五级组织结构。" />
+      </a-form>
+      <template #footer>
+        <a-space><a-button @click="orgDrawerOpen = false">取消</a-button><a-button type="primary" @click="orgDrawerOpen = false">确定</a-button></a-space>
+      </template>
+    </a-drawer>
+
+    <a-drawer v-model:open="transferOpen" title="更换组织" width="560">
+      <a-form layout="vertical">
+        <a-form-item label="成员范围"><a-checkbox-group :options="['当前成员', '已勾选成员', '当前组织全部成员']" /></a-form-item>
+        <a-form-item label="目标组织"><a-tree-select placeholder="请选择目标组织" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-space><a-button @click="transferOpen = false">取消</a-button><a-button type="primary" @click="transferOpen = false">确定更换</a-button></a-space>
+      </template>
+    </a-drawer>
   </div>
 </template>
 
@@ -167,6 +230,10 @@ onMounted(async () => {
 }
 
 .page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   padding: 16px 20px;
   border-bottom: 1px solid $divider;
 }
@@ -177,9 +244,40 @@ onMounted(async () => {
   font-weight: 600;
 }
 
+.page-desc {
+  margin: 6px 0 0;
+  color: $text-secondary;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 20px 0;
+}
+
+.guide-card {
+  padding: 14px;
+  border: 1px solid $divider;
+  border-radius: 12px;
+  background: #fbfdff;
+
+  strong {
+    color: $text-primary;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: $text-secondary;
+    line-height: 1.6;
+  }
+}
+
 .split {
   display: flex;
   min-height: 400px;
+  margin-top: 16px;
+  border-top: 1px solid $divider;
 }
 
 .tree-panel {
@@ -203,6 +301,10 @@ onMounted(async () => {
 }
 
 .detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
@@ -222,6 +324,22 @@ onMounted(async () => {
   justify-content: flex-end;
   margin-top: 12px;
 }
+
+@media (max-width: 960px) {
+  .page-head,
+  .detail-head {
+    flex-direction: column;
+  }
+
+  .guide-grid,
+  .split {
+    display: block;
+  }
+
+  .tree-panel {
+    width: auto;
+    border-right: 0;
+    border-bottom: 1px solid $divider;
+  }
+}
 </style>
-
-

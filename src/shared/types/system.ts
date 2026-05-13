@@ -7,6 +7,9 @@ export interface SystemUserRow {
   orgName: string;
   roleNames: string;
   status: string;
+  position?: string;
+  description?: string;
+  permissionSummary?: string;
 }
 
 export interface SystemOrgNode {
@@ -21,6 +24,7 @@ export interface SystemOrgMemberRow {
   displayName: string;
   loginName: string;
   role: string;
+  position?: string;
 }
 
 export interface SystemRoleRow {
@@ -29,4 +33,8 @@ export interface SystemRoleRow {
   code: string;
   description: string;
   updatedAt: string;
+  scope?: string;
+  roleType?: string;
+  dataPermission?: string;
+  functionPermission?: string;
 }

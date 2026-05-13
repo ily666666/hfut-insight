@@ -29,29 +29,60 @@ const fullscreenTitle = computed(() =>
 );
 
 const equipmentStats = [
-  { icon: 'mdi:monitor-dashboard', label: '设备总数', value: '1个' },
-  { icon: 'mdi:percent-outline', label: '设备在线率', value: '100%' },
-  { icon: 'mdi:map-marker-radius-outline', label: '点位总数', value: '1个' },
-  { icon: 'mdi:map-marker-check-outline', label: '点位在线率', value: '100%' },
+  { icon: 'mdi:monitor-dashboard', label: '设备总数', value: '386个' },
+  { icon: 'mdi:percent-outline', label: '设备在线率', value: '96.4%' },
+  { icon: 'mdi:map-marker-radius-outline', label: '点位总数', value: '312个' },
+  { icon: 'mdi:map-marker-check-outline', label: '点位在线率', value: '94.7%' },
 ];
 
 const skillStats = [
-  { icon: 'mdi:clipboard-text-clock-outline', label: '运行计划总数', value: '0个' },
-  { icon: 'mdi:calendar-check-outline', label: '启用计划数', value: '0个' },
-  { icon: 'mdi:creation-outline', label: '已使用技能数', value: '0个' },
-  { icon: 'mdi:map-marker-check-outline', label: '已配置点位数', value: '0个' },
+  { icon: 'mdi:clipboard-text-clock-outline', label: '运行计划总数', value: '42个' },
+  { icon: 'mdi:calendar-check-outline', label: '启用计划数', value: '36个' },
+  { icon: 'mdi:creation-outline', label: '已使用技能数', value: '18个' },
+  { icon: 'mdi:map-marker-check-outline', label: '已配置点位数', value: '286个' },
+];
+
+const centerMetrics = [
+  { label: '今日预警', value: '32' },
+  { label: '待复判', value: '6' },
+  { label: '已归档', value: '18' },
+];
+
+const cloudEdgeNodes = [
+  { name: '边缘节点-厂区A', status: '在线', load: '68%' },
+  { name: '边缘节点-仓储B', status: '在线', load: '54%' },
+  { name: '云端模型服务', status: '运行中', load: '72%' },
+];
+
+const dashboardModules = [
+  { name: '预警事件', source: '预警管理 / 收藏夹 / 档案夹', position: '中心主屏' },
+  { name: '预警查阅情况', source: '预警记录查阅状态', position: '左侧中部' },
+  { name: '点位预警排名', source: '点位维度聚合', position: '右侧中部' },
+  { name: '预警等级占比', source: '等级维度统计', position: '中心底部' },
 ];
 
 const alertRecords = [
   { name: '叉车运行非作业人员闯入', time: '2026-04-23 09:13:56' },
+  { name: '未戴安全帽识别', time: '2026-04-23 10:18:42' },
+  { name: '烟火风险疑似事件', time: '2026-04-23 11:06:23' },
 ];
 
 const alertTypeRanks = [
-  { label: '叉车运行非作业人员闯入', value: 1 },
+  { label: '叉车运行非作业人员闯入', value: 0.92, count: 12 },
+  { label: '未戴安全帽识别', value: 0.68, count: 9 },
+  { label: '区域越界', value: 0.42, count: 5 },
+];
+
+const pointRanks = [
+  { label: '体验套餐-模拟通道', value: 0.88, count: 8 },
+  { label: '施工入口 B-01', value: 0.72, count: 6 },
+  { label: '仓储装卸区 C-02', value: 0.46, count: 4 },
 ];
 
 const orgRanks = [
-  { label: '123456789', value: 1 },
+  { label: '123456789', value: 0.86, count: 18 },
+  { label: '安全生产部', value: 0.58, count: 9 },
+  { label: '仓储运营组', value: 0.36, count: 5 },
 ];
 
 function syncFullscreen() {
@@ -101,7 +132,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="screen-actions">
-        <button class="action-btn" type="button" title="设置">
+        <button class="action-btn" type="button" title="设置数据来源和图表组件">
           <Icon icon="mdi:cog-outline" />
         </button>
         <button class="action-btn" type="button" :title="fullscreenTitle" @click="toggleFullscreen">
@@ -134,14 +165,26 @@ onBeforeUnmount(() => {
         </div>
         <div class="event-panel">
           <div class="event-preview">
-            <div class="empty-cloud">
-              <div class="empty-cloud-shape" />
-              <div class="empty-text">暂无数据</div>
+            <div class="center-insight">
+              <div class="insight-orbit">
+                <Icon icon="mdi:video-wireless-outline" />
+                <span>云边协同识别中</span>
+              </div>
+              <div class="center-metrics">
+                <div v-for="item in centerMetrics" :key="item.label" class="center-metric">
+                  <strong>{{ item.value }}</strong>
+                  <span>{{ item.label }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="event-thumbs">
-            <div v-for="index in 5" :key="index" class="thumb-item" />
+          <div class="dashboard-config">
+            <div v-for="item in dashboardModules" :key="item.name" class="config-chip">
+              <strong>{{ item.name }}</strong>
+              <span>{{ item.source }}</span>
+              <em>{{ item.position }}</em>
+            </div>
           </div>
         </div>
       </section>
@@ -207,9 +250,14 @@ onBeforeUnmount(() => {
           <button class="tab-chip" type="button">周</button>
           <button class="tab-chip" type="button">月</button>
         </div>
-        <div class="empty-rank">
-          <div class="empty-cloud-shape" />
-          <div class="empty-text">暂无数据</div>
+        <div class="rank-list">
+          <div v-for="item in pointRanks" :key="item.label" class="rank-row">
+            <div class="rank-label">{{ item.label }}</div>
+            <div class="rank-bar">
+              <span class="rank-fill" :style="{ width: `${item.value * 100}%` }" />
+            </div>
+            <div class="rank-value">{{ item.count }}</div>
+          </div>
         </div>
       </section>
 
@@ -246,7 +294,7 @@ onBeforeUnmount(() => {
             <div class="rank-bar">
               <span class="rank-fill" :style="{ width: `${item.value * 100}%` }" />
             </div>
-            <div class="rank-value">{{ item.value }}</div>
+            <div class="rank-value">{{ item.count }}</div>
           </div>
         </div>
       </section>
@@ -293,7 +341,7 @@ onBeforeUnmount(() => {
             <div class="rank-bar">
               <span class="rank-fill" :style="{ width: `${item.value * 100}%` }" />
             </div>
-            <div class="rank-value">{{ item.value }}</div>
+            <div class="rank-value">{{ item.count }}</div>
           </div>
         </div>
       </section>
@@ -597,14 +645,127 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
-.empty-cloud,
-.empty-rank {
+.center-insight {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 28px;
+  padding: 24px;
 }
 
+.insight-orbit {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 1px solid rgba(93, 171, 255, 0.46);
+  background:
+    radial-gradient(circle at center, rgba(69, 159, 255, 0.28), rgba(13, 32, 70, 0.82) 58%, rgba(13, 32, 70, 0.2));
+  box-shadow:
+    0 0 36px rgba(52, 140, 255, 0.26),
+    inset 0 0 28px rgba(83, 164, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #dcecff;
+  font-weight: 800;
+
+  svg {
+    width: 54px;
+    height: 54px;
+    color: #65d6ff;
+  }
+}
+
+.center-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: min(520px, 100%);
+}
+
+.center-metric {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(75, 145, 235, 0.42);
+  background: rgba(20, 45, 91, 0.76);
+  text-align: center;
+
+  strong {
+    display: block;
+    font-size: 28px;
+    color: #64d6ff;
+  }
+
+  span {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
+  }
+}
+
+.edge-node-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.edge-node {
+  display: grid;
+  gap: 4px;
+  min-height: 74px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(17, 37, 85, 0.95), rgba(10, 20, 47, 0.95));
+  border: 1px solid rgba(53, 122, 214, 0.28);
+
+  span {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+  }
+
+  strong {
+    color: #74f0a7;
+  }
+
+  em {
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 12px;
+    font-style: normal;
+  }
+}
+
+.dashboard-config {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.config-chip {
+  display: grid;
+  gap: 4px;
+  min-height: 74px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(17, 37, 85, 0.95), rgba(10, 20, 47, 0.95));
+  border: 1px solid rgba(53, 122, 214, 0.28);
+
+  strong {
+    color: #74f0a7;
+  }
+
+  span,
+  em {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 12px;
+    font-style: normal;
+  }
+}
 .empty-cloud-shape {
   width: 70px;
   height: 44px;

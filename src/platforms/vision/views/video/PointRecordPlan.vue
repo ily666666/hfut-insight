@@ -2,6 +2,14 @@
 import { ref } from 'vue';
 import { DEMO_ORG_ID, DEMO_POINT_NAME } from '@/platforms/vision/constants/demo-data';
 
+const recordSteps = ['选择组织点位', '配置录像周期', '设置存储策略', '启用计划', '回放检索与导出'];
+
+const recordSummary = [
+  { title: '录像模式', value: '计划/手动/告警触发', desc: '支持全天、按时段、手动录像和预警触发录像。' },
+  { title: '存储策略', value: '7/30/90天', desc: '按点位配置保留天数、覆盖策略和导出权限。' },
+  { title: '回放导出', value: '检索/剪辑/下载', desc: '按点位与时间范围检索录像，导出片段进入任务中心。' },
+];
+
 const includeChildren = ref(true);
 const selectedKeys = ref<string[]>([DEMO_ORG_ID]);
 const rows = ref([
@@ -11,8 +19,25 @@ const rows = ref([
     status: '在线',
     orgName: DEMO_ORG_ID,
     pointType: '设备点位',
-    configStatus: '未配置',
-    enabled: false,
+    recordMode: '计划录像',
+    schedule: '每天 08:00-20:00',
+    storage: '30天自动覆盖',
+    playback: '支持回放/剪辑/导出',
+    configStatus: '已配置',
+    enabled: true,
+  },
+  {
+    id: '2',
+    name: '仓储装卸区 C-02',
+    status: '在线',
+    orgName: DEMO_ORG_ID,
+    pointType: '设备点位',
+    recordMode: '告警触发录像',
+    schedule: '全天候',
+    storage: '90天保留',
+    playback: '告警片段可导出',
+    configStatus: '已配置',
+    enabled: true,
   },
 ]);
 </script>
@@ -31,6 +56,17 @@ const rows = ref([
           <a-button disabled>批量配置录像计划</a-button>
         </div>
       </div>
+
+        <section class="record-guide">
+          <a-steps size="small" :current="3" :items="recordSteps.map((title) => ({ title }))" />
+          <div class="record-summary">
+            <article v-for="item in recordSummary" :key="item.title" class="record-summary-card">
+              <span>{{ item.title }}</span>
+              <strong>{{ item.value }}</strong>
+              <p>{{ item.desc }}</p>
+            </article>
+          </div>
+        </section>
 
       <div class="official-split">
         <aside class="official-side-panel">
@@ -90,6 +126,10 @@ const rows = ref([
               <a-table-column title="点位状态" data-index="status" key="status" />
               <a-table-column title="所属组织" data-index="orgName" key="orgName" />
               <a-table-column title="点位类型" data-index="pointType" key="pointType" />
+              <a-table-column title="录像模式" data-index="recordMode" key="recordMode" />
+              <a-table-column title="录像周期" data-index="schedule" key="schedule" />
+              <a-table-column title="存储策略" data-index="storage" key="storage" />
+              <a-table-column title="回放导出" data-index="playback" key="playback" />
               <a-table-column title="录像配置状态" data-index="configStatus" key="configStatus" />
               <a-table-column title="计划启停" key="enabled">
                 <template #default="{ record }">
@@ -101,6 +141,8 @@ const rows = ref([
                   <a-space :size="12">
                     <a>查看计划</a>
                     <a>编辑计划</a>
+                    <a>回放</a>
+                    <a>导出</a>
                   </a-space>
                 </template>
               </a-table-column>
@@ -128,6 +170,49 @@ const rows = ref([
   justify-content: space-between;
   gap: 12px;
   padding: 0 24px 16px;
+}
+
+.record-guide {
+  margin: 0 24px 16px;
+  padding: 14px;
+  border: 1px solid #e6eefc;
+  border-radius: 14px;
+  background: #f7faff;
+}
+
+.record-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.record-summary-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+
+  span,
+  strong {
+    display: block;
+  }
+
+  span {
+    color: $text-secondary;
+    font-size: 12px;
+  }
+
+  strong {
+    margin: 6px 0;
+    color: $text-primary;
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+    color: $text-secondary;
+    line-height: 1.6;
+  }
 }
 
 .side-head {

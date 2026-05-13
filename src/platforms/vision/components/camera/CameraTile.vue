@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useMonitorStore } from '@/platforms/vision/stores/monitor';
 import { useDragChannel } from '@/platforms/vision/composables/useDragChannel';
 import { useStreamPlayer } from '@/platforms/vision/composables/useStreamPlayer';
@@ -26,6 +26,26 @@ const streamSource = computed(() => {
 useStreamPlayer(videoRef, streamSource);
 
 const dragOver = ref(false);
+const thumbnailError = ref(false);
+const muted = ref(true);
+
+function onThumbnailError() {
+  thumbnailError.value = true;
+}
+
+watch(muted, (v) => {
+  const el = videoRef.value;
+  if (!el) return;
+  el.muted = v;
+  if (!v) {
+    el.play().catch(() => {});
+  }
+});
+
+function toggleMute(e: MouseEvent) {
+  e.stopPropagation();
+  muted.value = !muted.value;
+}
 
 function onClick() {
   store.selectSlot(props.slot.slot);
@@ -84,29 +104,23 @@ function onTileFullscreen(e: MouseEvent) {
     <template v-if="channel">
       <div class="tile-body">
         <div class="video">
-          <img
-            v-if="channel.thumbnail"
-            :src="channel.thumbnail"
-            :alt="channel.name"
-            class="video-fallback"
-            draggable="false"
-          />
           <video
             v-if="channel.streamUrl"
             ref="videoRef"
             class="video-el"
             muted
             playsinline
-            :poster="channel.thumbnail || '/assets/forklift.svg'"
+            :poster="!thumbnailError && channel.thumbnail ? channel.thumbnail : undefined"
           />
           <img
-            v-else
-            :src="channel.thumbnail || '/assets/forklift.svg'"
+            v-else-if="channel.thumbnail && !thumbnailError"
+            :src="channel.thumbnail"
             :alt="channel.name"
             class="video-img"
             draggable="false"
+            @error="onThumbnailError"
           />
-          <div class="watermark">合工大识界</div>
+          <div class="watermark">慧眼识界</div>
         </div>
       </div>
       <div class="tile-footer">
@@ -120,6 +134,14 @@ function onTileFullscreen(e: MouseEvent) {
           <span class="name-text">{{ channel.name }}</span>
         </div>
         <div class="ops">
+          <button
+            v-if="channel.streamUrl"
+            class="op-btn is-always"
+            :title="muted ? '取消静音' : '静音'"
+            @click="toggleMute"
+          >
+            <span :class="muted ? 'i-mdi-volume-off' : 'i-mdi-volume-high'" />
+          </button>
           <button class="op-btn" title="全屏" @click="onTileFullscreen">
             <span class="i-mdi-fullscreen" />
           </button>
@@ -193,15 +215,6 @@ function onTileFullscreen(e: MouseEvent) {
   background: #02060f;
 }
 
-.video-fallback {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
 .video-img,
 .video-el {
   width: 100%;
@@ -271,8 +284,6 @@ function onTileFullscreen(e: MouseEvent) {
 .ops {
   display: flex;
   gap: 4px;
-  opacity: 0;
-  transition: opacity 0.12s;
 }
 
 .op-btn {
@@ -285,8 +296,13 @@ function onTileFullscreen(e: MouseEvent) {
   align-items: center;
   justify-content: center;
   border-radius: 3px;
-  transition: background-color 0.12s, color 0.12s;
+  transition: background-color 0.12s, color 0.12s, opacity 0.12s;
   font-size: 14px;
+  opacity: 0;
+
+  &.is-always {
+    opacity: 1;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.12);
@@ -294,8 +310,8 @@ function onTileFullscreen(e: MouseEvent) {
   }
 }
 
-.camera-tile:hover .ops,
-.camera-tile.is-selected .ops {
+.camera-tile:hover .op-btn,
+.camera-tile.is-selected .op-btn {
   opacity: 1;
 }
 

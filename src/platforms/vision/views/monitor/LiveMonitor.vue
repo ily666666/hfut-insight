@@ -23,9 +23,10 @@ function handleFullscreen() {
 
 <template>
   <div class="live-monitor-page">
-    <div class="official-page-head">
-      <h1 class="official-page-title">实时监控</h1>
-    </div>
+    <header class="live-monitor-head">
+      <h1 class="live-monitor-title">实时监控</h1>
+    </header>
+
     <div class="live-monitor">
       <CameraTree />
 
@@ -49,9 +50,17 @@ function handleFullscreen() {
   background: $bg-white;
 }
 
-.official-page-head {
+.live-monitor-head {
   flex: 0 0 auto;
-  padding: 20px 24px 16px;
+  padding: 12px 20px;
+}
+
+.live-monitor-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: $text-primary;
+  line-height: 1.4;
 }
 
 .live-monitor {
@@ -60,7 +69,6 @@ function handleFullscreen() {
   min-height: 0;
   min-width: 0;
   background: $bg-white;
-  border-top: 1px solid $divider;
 }
 
 .camera-center {
@@ -72,4 +80,3 @@ function handleFullscreen() {
   overflow: hidden;
 }
 </style>
-

@@ -5,7 +5,7 @@ export const hfut_ORIGIN =
 /** 与采集 HTML 中「监测预警一张图」一致的应用内路径 */
 export const MONITOR_DASHBOARD_URL = `${hfut_ORIGIN}/app/app-dashboard`;
 
-/** 系统管理「安全认证」外链（可配环境变量） */
+/** 系统管理「多用户访问控制」在线文档外链（可配环境变量） */
 export const SECURITY_AUTH_URL =
   import.meta.env.VITE_SECURITY_AUTH_URL ||
-  'https://cloud.baidu.com/doc/IOTSTACK/s/1l1t2h3j4k';
+  'https://cloud.baidu.com/doc/yijian/s/dmnssc0ru';

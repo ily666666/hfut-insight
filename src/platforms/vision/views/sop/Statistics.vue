@@ -1,3 +1,23 @@
+<script setup lang="ts">
+const summaryCards = [
+  { title: '非标准作业预警', value: '128', unit: '次', desc: '分类展示步骤未执行、顺序执行错误和步骤执行超时占比。' },
+  { title: 'SOP规则', value: '24', unit: '个', desc: '运行中 18 个，未启动 6 个。' },
+  { title: 'SOP点位', value: '86', unit: '个', desc: '运行中 72 个，未启动 10 个，异常 4 个。' },
+];
+
+const rankRows = [
+  { rank: 1, type: '步骤执行超时', rule: '叉车装卸作业SOP', source: '仓储装卸区 C-02', count: 42, ratio: '+8', trend: '上升' },
+  { rank: 2, type: '顺序执行错误', rule: '高处作业防护SOP', source: '施工入口 B-01', count: 31, ratio: '-3', trend: '下降' },
+  { rank: 3, type: '步骤未执行', rule: '危化巡检SOP', source: '危化仓储区 A-03', count: 18, ratio: '+2', trend: '上升' },
+];
+
+const trendRows = [
+  { label: '步骤未执行', value: 18, percent: 0.32 },
+  { label: '顺序执行错误', value: 31, percent: 0.58 },
+  { label: '步骤执行超时', value: 42, percent: 0.78 },
+];
+</script>
+
 <template>
   <div class="official-page">
     <div class="official-page-head">
@@ -7,9 +27,9 @@
       <div class="official-filter-panel">
         <div class="filter-row">
           <a-range-picker />
-          <a-select placeholder="非标准作业" :options="[{ value: 'all', label: '非标准作业' }]" />
-          <a-select placeholder="数据源" :options="[{ value: 'all', label: '数据源' }]" />
-          <a-select placeholder="规则名称" :options="[{ value: 'all', label: '规则名称' }]" />
+          <a-select placeholder="非标准作业" :options="[{ value: 'all', label: '全部类型' }, { value: 'timeout', label: '步骤执行超时' }, { value: 'missing', label: '步骤未执行' }, { value: 'order', label: '顺序执行错误' }]" />
+          <a-select placeholder="数据源" :options="[{ value: 'all', label: '全部数据源' }, { value: 'c02', label: '仓储装卸区 C-02' }]" />
+          <a-select placeholder="规则名称" :options="[{ value: 'all', label: '全部规则' }, { value: 'forklift', label: '叉车装卸作业SOP' }]" />
           <div class="actions">
             <a-button>重置</a-button>
             <a-button type="primary">查询</a-button>
@@ -18,38 +38,13 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-title">非标准作业预警</div>
+        <div v-for="item in summaryCards" :key="item.title" class="stat-card">
+          <div class="stat-title">{{ item.title }}</div>
           <div class="stat-main">
-            <div class="big-number">0<span>次</span></div>
-            <div class="ring ring-gray" />
+            <div class="big-number">{{ item.value }}<span>{{ item.unit }}</span></div>
+            <div class="ring" />
           </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">SOP规则</div>
-          <div class="stat-main dual">
-            <div class="big-number">0<span>个</span></div>
-            <div class="legend">
-              <span><i class="dot green" /> 运行中</span>
-              <span><i class="dot gray" /> 未启动</span>
-              <strong>--</strong>
-              <strong>--</strong>
-            </div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">SOP点位</div>
-          <div class="stat-main dual">
-            <div class="big-number">0<span>个</span></div>
-            <div class="legend three">
-              <span><i class="dot green" /> 运行中</span>
-              <span><i class="dot gray" /> 未启动</span>
-              <span><i class="dot orange" /> 异常</span>
-              <strong>0</strong>
-              <strong>0</strong>
-              <strong>0</strong>
-            </div>
-          </div>
+          <p>{{ item.desc }}</p>
         </div>
       </div>
 
@@ -57,23 +52,24 @@
         <div class="section-head">
           <h3>非标准作业排名</h3>
           <div class="official-toolbar">
-            <button class="mini active">按预警</button>
-            <button class="mini">按规则</button>
+            <button class="mini active">按预警类型</button>
+            <button class="mini">按SOP规则</button>
             <button class="mini">按数据源</button>
-            <a-button disabled>下载</a-button>
+            <a-button>下载</a-button>
             <a-button>更多</a-button>
           </div>
         </div>
         <div class="official-table-card">
-          <a-table :data-source="[]" :pagination="false">
-            <a-table-column title="排名" key="rank" />
-            <a-table-column title="非标准作业类型" key="type" />
-            <a-table-column title="非标准作业次数" key="count" />
-            <a-table-column title="环比次数" key="ratio" />
-            <a-table-column title="趋势" key="trend" />
-            <template #emptyText>
-              <a-empty description="暂无数据" />
-            </template>
+          <a-table :data-source="rankRows" :pagination="false" row-key="rank">
+            <a-table-column title="排名" data-index="rank" key="rank" width="80" />
+            <a-table-column title="非标准作业类型" data-index="type" key="type" />
+            <a-table-column title="SOP规则" data-index="rule" key="rule" />
+            <a-table-column title="数据源" data-index="source" key="source" />
+            <a-table-column title="非标准作业次数" data-index="count" key="count" />
+            <a-table-column title="环比次数" data-index="ratio" key="ratio" />
+            <a-table-column title="趋势" data-index="trend" key="trend">
+              <template #default="{ record }"><a-tag :color="record.trend === '上升' ? 'red' : 'green'">{{ record.trend }}</a-tag></template>
+            </a-table-column>
           </a-table>
         </div>
       </section>
@@ -83,8 +79,12 @@
           <h3>非标准作业趋势</h3>
           <a-button>更多</a-button>
         </div>
-        <div class="official-card trend-empty">
-          <a-empty description="暂无数据" />
+        <div class="trend-card">
+          <div v-for="item in trendRows" :key="item.label" class="trend-row">
+            <span>{{ item.label }}</span>
+            <div class="trend-bar"><i :style="{ width: `${item.percent * 100}%` }" /></div>
+            <strong>{{ item.value }}次</strong>
+          </div>
         </div>
       </section>
     </div>
@@ -121,6 +121,12 @@
   border: 1px solid $divider;
   border-radius: 14px;
   padding: 18px 20px;
+
+  p {
+    margin: 12px 0 0;
+    color: $text-secondary;
+    line-height: 1.6;
+  }
 }
 
 .stat-title {
@@ -133,10 +139,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.stat-main.dual {
-  align-items: flex-start;
 }
 
 .big-number {
@@ -155,38 +157,8 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  border: 10px solid #d8d8d8;
-}
-
-.legend {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: 10px 22px;
-  align-items: center;
-}
-
-.legend.three {
-  grid-template-columns: repeat(3, auto);
-}
-
-.dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 6px;
-
-  &.green {
-    background: #35b61b;
-  }
-
-  &.gray {
-    background: #b7c1d4;
-  }
-
-  &.orange {
-    background: #ff9326;
-  }
+  border: 10px solid #2f76ff;
+  border-left-color: #d8d8d8;
 }
 
 .section-head {
@@ -215,10 +187,40 @@
   }
 }
 
-.trend-empty {
+.trend-card {
+  display: grid;
+  gap: 14px;
   min-height: 220px;
-  display: flex;
+  padding: 20px;
+  border: 1px solid $divider;
+  border-radius: 14px;
+}
+
+.trend-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 80px;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+}
+
+.trend-bar {
+  height: 12px;
+  border-radius: 999px;
+  background: #eef3fb;
+  overflow: hidden;
+
+  i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2f76ff, #63c4ff);
+  }
+}
+
+@media (max-width: 1080px) {
+  .filter-row,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

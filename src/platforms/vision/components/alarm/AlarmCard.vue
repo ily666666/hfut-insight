@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import dayjs from 'dayjs';
 import type { AlarmRecord } from '@/platforms/vision/types/alarm';
 
@@ -11,6 +12,12 @@ const levelText: Record<number, string> = {
   4: '四级',
   5: '五级',
 };
+
+const imageError = ref(false);
+
+function onImageError() {
+  imageError.value = true;
+}
 
 function formatRelativeTime(value: string) {
   const time = dayjs(value);
@@ -27,10 +34,15 @@ function formatRelativeTime(value: string) {
   <div class="alarm-card">
     <div class="image">
       <img
-        :src="alarm.thumbnail || '/assets/forklift.svg'"
+        v-if="alarm.thumbnail && !imageError"
+        :src="alarm.thumbnail"
         :alt="alarm.title"
         draggable="false"
+        @error="onImageError"
       />
+      <div v-else class="image-placeholder">
+        <span class="i-mdi-image-outline placeholder-icon" />
+      </div>
       <div class="level">{{ levelText[alarm.level] || `${alarm.level}级` }}</div>
     </div>
     <div class="title">{{ alarm.title }}</div>
@@ -69,6 +81,20 @@ function formatRelativeTime(value: string) {
     object-fit: cover;
     display: block;
   }
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a2440 0%, #0f1832 100%);
+}
+
+.placeholder-icon {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .level {

@@ -7,6 +7,9 @@ export interface AnalysisViewFileRow {
   tags: string[];
   updatedAt: string;
   sizeLabel: string;
+  folder?: string;
+  startTime?: string;
+  analysisStatus?: string;
 }
 
 export interface AnalysisPlanRow {
@@ -15,6 +18,10 @@ export interface AnalysisPlanRow {
   status: string;
   schedule: string;
   updatedAt: string;
+  type?: string;
+  folder?: string;
+  skill?: string;
+  notification?: string;
 }
 
 export interface AnalysisTaskRow {
@@ -24,4 +31,8 @@ export interface AnalysisTaskRow {
   status: string;
   progress: number;
   updatedAt: string;
+  fileSummary?: string;
+  eventCount?: number;
+  noEventCount?: number;
+  logSummary?: string;
 }

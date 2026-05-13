@@ -44,8 +44,7 @@ const { slots, layout } = storeToRefs(store);
 }
 
 .camera-grid.is-fit :deep(.video-img),
-.camera-grid.is-fit :deep(.video-el),
-.camera-grid.is-fit :deep(.video-fallback) {
+.camera-grid.is-fit :deep(.video-el) {
   object-fit: cover;
 }
 </style>

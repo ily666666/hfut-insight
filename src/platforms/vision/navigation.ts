@@ -3,9 +3,15 @@ import type {
   SecondaryMenuConfig,
 } from '@/shared/types/navigation';
 
-const footerText = '©2026 Power By 合工大识界';
+const footerText = '©2026 Power By 慧眼识界';
 
 export const visionPrimaryMenu: PrimaryMenuItem[] = [
+  {
+    key: 'home',
+    title: '主页',
+    icon: 'mdi:home',
+    defaultRoute: '/vision/home',
+  },
   {
     key: 'monitor',
     title: '监测预警',
@@ -191,6 +197,24 @@ export const visionSecondaryMenu: Record<string, SecondaryMenuConfig> = {
         route: '/vision/analysis/plan',
       },
       {
+        key: 'analysis-tasks',
+        title: '分析任务',
+        icon: 'mdi:progress-clock',
+        route: '/vision/analysis/analysis-tasks',
+      },
+      {
+        key: 'events',
+        title: '事件记录',
+        icon: 'mdi:alert-circle-outline',
+        route: '/vision/analysis/events',
+      },
+      {
+        key: 'statistics',
+        title: '统计概览',
+        icon: 'mdi:chart-bar',
+        route: '/vision/analysis/statistics',
+      },
+      {
         key: 'app-notify',
         title: '应用通知',
         icon: 'mdi:bullhorn-outline',
@@ -260,8 +284,8 @@ export const visionSecondaryMenu: Record<string, SecondaryMenuConfig> = {
       },
       {
         key: 'security-auth',
-        title: '安全认证',
-        icon: 'mdi:shield-check-outline',
+        title: '多用户访问控制',
+        icon: 'mdi:shield-account-outline',
         route: '/vision/system/security-auth',
       },
     ],

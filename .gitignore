@@ -19,3 +19,6 @@ tools/capture/node_modules
 tools/capture/output
 /capture/
 /capture2/
+
+.claude/
+.快速入门/

@@ -8,6 +8,7 @@ export interface SopNonstandardAlarmRow {
   orgName: string;
   status: string;
   alarmTime: string;
+  alarmStep?: string;
 }
 
 export interface SopRuleRow {

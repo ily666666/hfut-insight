@@ -100,7 +100,7 @@ function handleNavigate(item: SecondaryMenuItem) {
         />
       </ul>
 
-      <div class="footer">{{ config.footerText || '©2026 Power By 合工大识界' }}</div>
+      <div class="footer">{{ config.footerText || '©2026 Power By 慧眼识界' }}</div>
     </aside>
 
     <button

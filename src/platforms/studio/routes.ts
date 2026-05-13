@@ -1,13 +1,16 @@
 import type { RouteRecordRaw } from 'vue-router';
 import type { PageToolbarAction } from '@/shared/types/page-toolbar';
 import {
+  API_MANAGEMENT_PAGE,
   BUILD_PLAN_PAGE,
   DATASET_PAGE,
   EVALUATE_PAGE,
   INFERENCE_PAGE,
   MODEL_REPOSITORY_PAGE,
+  OFFLINE_DEPLOY_PAGE,
   OPERATOR_PAGE,
   ORCHESTRATE_PAGE,
+  QUICK_START_PAGE,
   REPOSITORY_PAGE,
   SCENE_MODEL_PAGE,
   SKILL_CATALOG_PAGE,
@@ -43,6 +46,29 @@ export const studioRoutes: RouteRecordRaw[] = [
       {
         path: 'explore',
         redirect: studioPath('explore', 'skills'),
+      },
+      {
+        path: 'explore/comparison',
+        name: 'YijianComparison',
+        component: () => import('@/platforms/studio/views/YijianComparisonPage.vue'),
+        meta: {
+          platform: 'studio',
+          primary: 'explore',
+          secondary: 'comparison',
+          title: '能力对标',
+        },
+      },
+      {
+        path: 'explore/quick-start',
+        name: 'SkillExploreQuickStart',
+        component: () => import('@/platforms/studio/views/SkillTablePage.vue'),
+        meta: {
+          platform: 'studio',
+          primary: 'explore',
+          secondary: 'quick-start',
+          title: '快速开始',
+          tableConfig: QUICK_START_PAGE,
+        },
       },
       {
         path: 'explore/skills',
@@ -85,6 +111,17 @@ export const studioRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'workspace/orchestrate/editor',
+        name: 'SkillWorkspaceOrchestrateEditor',
+        component: () => import('@/platforms/studio/views/SkillOrchestratePage.vue'),
+        meta: {
+          platform: 'studio',
+          primary: 'workspace',
+          secondary: 'orchestrate',
+          title: '技能编排画布',
+        },
+      },
+      {
         path: 'workspace/repository',
         name: 'SkillWorkspaceRepository',
         component: () => import('@/platforms/studio/views/SkillTablePage.vue'),
@@ -106,6 +143,41 @@ export const studioRoutes: RouteRecordRaw[] = [
           secondary: 'evaluate',
           title: '技能评测',
           tableConfig: EVALUATE_PAGE,
+        },
+      },
+      {
+        path: 'workspace/api-management',
+        name: 'SkillWorkspaceApiManagement',
+        component: () => import('@/platforms/studio/views/SkillTablePage.vue'),
+        meta: {
+          platform: 'studio',
+          primary: 'workspace',
+          secondary: 'api-management',
+          title: 'API管理',
+          tableConfig: API_MANAGEMENT_PAGE,
+        },
+      },
+      {
+        path: 'workspace/api-reference',
+        name: 'SkillWorkspaceApiReference',
+        component: () => import('@/platforms/studio/views/ApiReferencePage.vue'),
+        meta: {
+          platform: 'studio',
+          primary: 'workspace',
+          secondary: 'api-reference',
+          title: 'API参考',
+        },
+      },
+      {
+        path: 'workspace/offline-deploy',
+        name: 'SkillWorkspaceOfflineDeploy',
+        component: () => import('@/platforms/studio/views/SkillTablePage.vue'),
+        meta: {
+          platform: 'studio',
+          primary: 'workspace',
+          secondary: 'offline-deploy',
+          title: '离线部署',
+          tableConfig: OFFLINE_DEPLOY_PAGE,
         },
       },
       {

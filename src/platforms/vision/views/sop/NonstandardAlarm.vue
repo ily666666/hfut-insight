@@ -20,13 +20,27 @@ const org = ref<string | undefined>(undefined);
 const dataSource = ref<string | undefined>(undefined);
 const keyword = ref('');
 
+const detailCards = [
+  { title: '预警详情', desc: '展示数据源、组织、规则名称、预警步骤和预警时间。' },
+  { title: '处理进展', desc: '记录处理人、有效/无效判定、处理意见和状态流转。' },
+  { title: '作业过程', desc: '展示总耗时、非标准步骤、每一步执行时间和异常原因。' },
+  { title: '证据材料', desc: '支持步骤抓拍图、前后 15 秒事件视频和实时监控画面。' },
+];
+
+const processRows = [
+  { step: '开始作业', status: '正确执行', time: '10:00:00', image: '有抓拍' },
+  { step: '人员避让', status: '顺序执行错误', time: '10:02:16', image: '有抓拍 / 有视频' },
+  { step: '结束确认', status: '未执行', time: '--', image: '无抓拍' },
+];
+
 const columns = [
   { title: '预警名称', dataIndex: 'name', key: 'name', ellipsis: true },
   { title: '规则', dataIndex: 'ruleName', key: 'ruleName', ellipsis: true },
   { title: '数据源', dataIndex: 'dataSource', key: 'dataSource' },
   { title: '组织', dataIndex: 'orgName', key: 'orgName' },
   { title: '处理状态', dataIndex: 'status', key: 'status' },
-  { title: '预警时间', dataIndex: 'alarmTime', key: 'alarmTime' },
+  { title: '预警步骤', dataIndex: 'alarmStep', key: 'alarmStep' },
+  { title: '操作', key: 'action', width: 220 },
 ];
 
 async function load() {
@@ -65,6 +79,13 @@ onMounted(load);
           <a-button @click="load">刷新</a-button>
         </div>
       </header>
+
+      <section class="detail-guide">
+        <article v-for="item in detailCards" :key="item.title" class="detail-card">
+          <strong>{{ item.title }}</strong>
+          <p>{{ item.desc }}</p>
+        </article>
+      </section>
 
       <div class="filter-card">
         <a-form layout="inline" class="filter-form">
@@ -121,6 +142,32 @@ onMounted(load);
           :pagination="false"
           size="middle"
         >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'status'">
+              <a-tag :color="record.status === '已处理' ? 'green' : 'orange'">{{ record.status }}</a-tag>
+            </template>
+            <template v-else-if="column.key === 'alarmStep'">
+              <a-tag color="red">{{ record.alarmStep || '人员避让' }}</a-tag>
+            </template>
+            <template v-else-if="column.key === 'action'">
+              <a-space><a>详情</a><a>上一条</a><a>下一条</a><a>处理</a></a-space>
+            </template>
+          </template>
+          <template #expandedRowRender>
+            <div class="expanded-detail">
+              <div class="evidence-tabs">
+                <a-tag color="blue">作业图片：上一张 / 下一张</a-tag>
+                <a-tag color="purple">事件视频：前后15秒</a-tag>
+                <a-tag color="green">实时监控</a-tag>
+              </div>
+              <a-table :data-source="processRows" row-key="step" size="small" :pagination="false">
+                <a-table-column title="作业步骤" data-index="step" key="step" width="160" />
+                <a-table-column title="执行状态" data-index="status" key="status" width="160" />
+                <a-table-column title="执行时间" data-index="time" key="time" width="140" />
+                <a-table-column title="证据" data-index="image" key="image" />
+              </a-table>
+            </div>
+          </template>
           <template #emptyText>
             <a-empty description="暂无预警数据" />
           </template>
@@ -173,6 +220,40 @@ onMounted(load);
 
 .page-actions {
   display: flex;
+  gap: 8px;
+}
+
+.detail-guide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 20px 0;
+}
+
+.detail-card {
+  padding: 12px;
+  border: 1px solid #e6eefc;
+  border-radius: 12px;
+  background: #fbfdff;
+
+  strong {
+    color: $text-primary;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: $text-secondary;
+    line-height: 1.6;
+  }
+}
+.expanded-detail {
+  display: grid;
+  gap: 12px;
+}
+
+.evidence-tabs {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

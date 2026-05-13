@@ -3,7 +3,7 @@ import type {
   SecondaryMenuConfig,
 } from '@/shared/types/navigation';
 
-const footerText = '©2026 Power By 合工大识界';
+const footerText = '©2026 Power By 慧眼识界';
 
 export const studioPrimaryMenu: PrimaryMenuItem[] = [
   {
@@ -37,6 +37,18 @@ export const studioSecondaryMenu: Record<string, SecondaryMenuConfig> = {
     title: '探索',
     footerText,
     items: [
+      {
+        key: 'comparison',
+        title: '能力对标',
+        icon: 'mdi:map-search-outline',
+        route: '/studio/explore/comparison',
+      },
+      {
+        key: 'quick-start',
+        title: '快速开始',
+        icon: 'mdi:rocket-launch-outline',
+        route: '/studio/explore/quick-start',
+      },
       {
         key: 'skills',
         title: '技能广场',
@@ -75,6 +87,21 @@ export const studioSecondaryMenu: Record<string, SecondaryMenuConfig> = {
             key: 'evaluate',
             title: '技能评测',
             route: '/studio/workspace/evaluate',
+          },
+          {
+            key: 'api-management',
+            title: 'API管理',
+            route: '/studio/workspace/api-management',
+          },
+          {
+            key: 'api-reference',
+            title: 'API参考',
+            route: '/studio/workspace/api-reference',
+          },
+          {
+            key: 'offline-deploy',
+            title: '离线部署',
+            route: '/studio/workspace/offline-deploy',
           },
         ],
       },

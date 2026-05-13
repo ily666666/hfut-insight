@@ -22,6 +22,19 @@ function visionPath(module: string, child?: string) {
 
 export const visionRoutes: RouteRecordRaw[] = [
   {
+    path: visionPath('home'),
+    component: AppLayout,
+    meta: { platform: 'vision', primary: 'home', hideSecondary: true },
+    children: [
+      {
+        path: '',
+        name: 'VisionHome',
+        component: () => import('@/platforms/vision/views/HomePage.vue'),
+        meta: { title: '主页', platform: 'vision', primary: 'home', hideSecondary: true },
+      },
+    ],
+  },
+  {
     path: visionPath('monitor', 'dashboard'),
     name: 'MonitorDashboard',
     component: () => import('@/platforms/vision/views/monitor/MonitorDashboard.vue'),
@@ -47,6 +60,12 @@ export const visionRoutes: RouteRecordRaw[] = [
         name: 'AlarmRecord',
         component: () => import('@/platforms/vision/views/monitor/AlarmRecord.vue'),
         meta: { title: '预警记录', secondary: 'alarm-record', platform: 'vision' },
+      },
+      {
+        path: 'alarm-review',
+        name: 'AlarmReview',
+        component: () => import('@/platforms/vision/views/monitor/AlarmReview.vue'),
+        meta: { title: '预警复判', secondary: 'alarm-record', platform: 'vision' },
       },
       {
         path: 'alarm-archive',
@@ -188,8 +207,8 @@ export const visionRoutes: RouteRecordRaw[] = [
     redirect: visionPath('analysis', 'view-files'),
     meta: { platform: 'vision', primary: 'analysis' },
     children: [
-      { path: 'tasks', redirect: visionPath('analysis', 'plan') },
-      { path: 'results', redirect: visionPath('analysis', 'plan') },
+      { path: 'tasks', redirect: visionPath('analysis', 'analysis-tasks') },
+      { path: 'results', redirect: visionPath('analysis', 'events') },
       { path: 'packages', redirect: visionPath('analysis', 'view-files') },
       {
         path: 'view-files',
@@ -210,6 +229,38 @@ export const visionRoutes: RouteRecordRaw[] = [
           title: '分析计划',
           secondary: 'plan',
           pageActions: listPage,
+          platform: 'vision',
+        },
+      },
+      {
+        path: 'analysis-tasks',
+        name: 'AnalysisTasks',
+        component: () => import('@/platforms/vision/views/analysis/AnalysisTasks.vue'),
+        meta: {
+          title: '分析任务',
+          secondary: 'analysis-tasks',
+          pageActions: listPage,
+          platform: 'vision',
+        },
+      },
+      {
+        path: 'events',
+        name: 'AnalysisEvents',
+        component: () => import('@/platforms/vision/views/analysis/AnalysisEvents.vue'),
+        meta: {
+          title: '事件记录',
+          secondary: 'events',
+          pageActions: listPage,
+          platform: 'vision',
+        },
+      },
+      {
+        path: 'statistics',
+        name: 'AnalysisStatistics',
+        component: () => import('@/platforms/vision/views/analysis/AnalysisStatistics.vue'),
+        meta: {
+          title: '统计概览',
+          secondary: 'statistics',
           platform: 'vision',
         },
       },
@@ -321,7 +372,7 @@ export const visionRoutes: RouteRecordRaw[] = [
         path: 'security-auth',
         name: 'SystemSecurityAuth',
         component: () => import('@/shared/views/system/SecurityAuth.vue'),
-        meta: { title: '安全认证', secondary: 'security-auth', platform: 'vision' },
+        meta: { title: '多用户访问控制', secondary: 'security-auth', platform: 'vision' },
       },
     ],
   },

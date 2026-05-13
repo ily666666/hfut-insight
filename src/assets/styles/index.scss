@@ -142,6 +142,28 @@ button {
   box-shadow: none;
 }
 
+// 修正 UnoCSS 图标在 antd Button 中的垂直对齐
+.ant-btn > .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.ant-btn > .anticon > [class^='i-mdi-'],
+.ant-btn > .anticon > [class*=' i-mdi-'] {
+  display: block;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ant-btn > [class^='i-mdi-'],
+.ant-btn > [class*=' i-mdi-'] {
+  display: inline-block;
+  vertical-align: -0.18em;
+  font-size: 14px;
+}
+
 .ant-btn-default {
   border-color: #d8dfeb;
 }
