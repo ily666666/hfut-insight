@@ -75,6 +75,7 @@ declare module 'vue' {
     CameraTile: typeof import('./../platforms/vision/components/camera/CameraTile.vue')['default']
     CameraToolbar: typeof import('./../platforms/vision/components/camera/CameraToolbar.vue')['default']
     CameraTree: typeof import('./../platforms/vision/components/camera/CameraTree.vue')['default']
+    CustomPointPicker: typeof import('./../platforms/vision/components/common/CustomPointPicker.vue')['default']
     PrimarySidebar: typeof import('./../shared/components/layout/PrimarySidebar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

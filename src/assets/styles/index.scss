@@ -205,6 +205,57 @@ button {
   border-radius: 10px;
 }
 
+// ============================================
+// 多选下拉框样式：在选项左侧显示复选框方框
+// 用法：在 <a-select mode="multiple"> 上加 popup-class-name="multi-check-dropdown"
+// 思路：通过 ::before 给每个选项画一个常驻的方框，选中后改成蓝底白勾
+//       并隐藏 antd 自带的 ✓ 图标（.ant-select-item-option-state）
+// ============================================
+.ant-select-dropdown.multi-check-dropdown {
+  .ant-select-item-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ant-select-item-option::before {
+    content: '';
+    order: -1;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #d4dceb;
+    border-radius: 3px;
+    background: #fff;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10px 10px;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease;
+  }
+
+  .ant-select-item-option-selected::before {
+    border-color: $brand-blue;
+    background-color: $brand-blue;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3.5 8 L7 11.5 L12.5 5.5' stroke='white' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  }
+
+  .ant-select-item-option:not(.ant-select-item-option-disabled):hover::before {
+    border-color: $brand-blue;
+  }
+
+  // 隐藏 antd 原本的右侧 ✓ 图标（已被我们左侧的方框替代）
+  .ant-select-item-option-state {
+    display: none;
+  }
+
+  .ant-select-item-option-content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

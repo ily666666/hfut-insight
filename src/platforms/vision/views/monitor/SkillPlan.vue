@@ -53,9 +53,23 @@ interface TaskRow {
 const WEEK_DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 const FORK_IMAGE = '/assets/forklift.svg';
 
+const router = useRouter();
+
 const view = ref<ViewMode>('list');
 const activeTab = ref<TabKey>('plan');
 const planViewType = ref<PlanViewType>('tile');
+
+// ====== 操作引导面板 ======
+const guideOpen = ref(true);
+function toggleGuide() {
+  guideOpen.value = !guideOpen.value;
+}
+function gotoAddDevice() {
+  router.push('/vision/asset/device');
+}
+function gotoAddSkill() {
+  router.push('/vision/asset/skills');
+}
 
 // ====== 列表数据 ======
 const plans = ref<PlanRow[]>([
@@ -281,52 +295,12 @@ interface OrgPointEntry {
 const orgPoints: OrgPointEntry[] = [
   { id: DEMO_POINT_ID, name: DEMO_POINT_NAME, orgKey: DEMO_ORG_ID, hasPlan: true },
 ];
-const drawerOrgKeys = ref<string[]>([]);
-const drawerOrgKeyword = ref('');
-const drawerPointKeyword = ref('');
-const drawerIncludeChildren = ref(true);
 const draftSelectedPointIds = ref<string[]>([]);
 const orgDrawerTreeData: TreeProps['treeData'] = orgTreeData;
 
-const drawerAvailablePoints = computed(() => {
-  if (drawerOrgKeys.value.length === 0) return [];
-  let list = orgPoints.filter((p) => drawerOrgKeys.value.includes(p.orgKey));
-  if (drawerPointKeyword.value) {
-    list = list.filter((p) => p.name.includes(drawerPointKeyword.value));
-  }
-  return list;
-});
 const drawerSelectedPoints = computed(() =>
   orgPoints.filter((p) => draftSelectedPointIds.value.includes(p.id)),
 );
-
-function togglePointSelection(id: string, checked: boolean) {
-  if (checked) {
-    if (!draftSelectedPointIds.value.includes(id)) draftSelectedPointIds.value.push(id);
-  } else {
-    draftSelectedPointIds.value = draftSelectedPointIds.value.filter((x) => x !== id);
-  }
-}
-
-function toggleAllAvailablePoints(checked: boolean) {
-  if (checked) {
-    const ids = drawerAvailablePoints.value.map((p) => p.id);
-    draftSelectedPointIds.value = Array.from(new Set([...draftSelectedPointIds.value, ...ids]));
-  } else {
-    const removeIds = drawerAvailablePoints.value.map((p) => p.id);
-    draftSelectedPointIds.value = draftSelectedPointIds.value.filter((x) => !removeIds.includes(x));
-  }
-}
-
-function clearDrawerSelectedPoints() {
-  draftSelectedPointIds.value = [];
-}
-
-const isAvailableAllChecked = computed(() => {
-  const list = drawerAvailablePoints.value;
-  if (list.length === 0) return false;
-  return list.every((p) => draftSelectedPointIds.value.includes(p.id));
-});
 
 // ====== 点位冲突 Modal ======
 const pointConflictOpen = ref(false);
@@ -1156,8 +1130,66 @@ function planLink(planId: string) {
     <template v-if="view === 'list'">
       <div class="official-page-head">
         <h1 class="official-page-title">技能运行计划</h1>
-        <a class="guide-link">操作引导 <span class="i-mdi-chevron-down" /></a>
+        <a class="guide-link" @click="toggleGuide">
+          操作引导
+          <span :class="guideOpen ? 'i-mdi-chevron-up' : 'i-mdi-chevron-down'" />
+        </a>
       </div>
+
+      <transition name="guide-fade">
+        <div v-if="guideOpen" class="guide-panel">
+          <div class="guide-title">创建运行计划前请先完成前序准备工作</div>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <div class="step-main">
+                <div class="step-header">
+                  <span class="step-no">1</span>
+                  <span class="step-name">添加设备</span>
+                </div>
+                <div class="step-desc">创建技能运行计划前请先完成设备和点位基础资源准备。</div>
+                <a class="step-link" @click="gotoAddDevice">
+                  去添加 <span class="i-mdi-open-in-new" />
+                </a>
+              </div>
+              <div class="step-illu">
+                <span class="i-mdi-monitor-dashboard" />
+              </div>
+            </div>
+            <div class="guide-arrow"><span class="i-mdi-chevron-right" /></div>
+            <div class="guide-step">
+              <div class="step-main">
+                <div class="step-header">
+                  <span class="step-no">2</span>
+                  <span class="step-name">添加技能</span>
+                </div>
+                <div class="step-desc">创建技能运行计划前请先完成技能资源准备。</div>
+                <a class="step-link" @click="gotoAddSkill">
+                  去添加 <span class="i-mdi-open-in-new" />
+                </a>
+              </div>
+              <div class="step-illu">
+                <span class="i-mdi-puzzle-outline" />
+              </div>
+            </div>
+            <div class="guide-arrow"><span class="i-mdi-chevron-right" /></div>
+            <div class="guide-step">
+              <div class="step-main">
+                <div class="step-header">
+                  <span class="step-no">3</span>
+                  <span class="step-name">创建计划</span>
+                </div>
+                <div class="step-desc">完成设备和技能资源准备后您需要创建技能运行计划。</div>
+                <a class="step-link" @click="openCreate">
+                  去创建 <span class="i-mdi-chevron-right" />
+                </a>
+              </div>
+              <div class="step-illu">
+                <span class="i-mdi-clipboard-text-outline" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
 
       <div class="official-card page-body">
         <div class="tabs">
@@ -2047,74 +2079,11 @@ function planLink(planId: string) {
                 <span class="i-mdi-information-outline" />
                 创建时按 1 个点位和 1 个技能的关联关系生成一个 1 条计划
               </div>
-              <div class="point-picker">
-                <div class="picker-col">
-                  <div class="picker-head">
-                    <span class="picker-head-title">选择组织</span>
-                    <a-checkbox v-model:checked="drawerIncludeChildren">包含下级</a-checkbox>
-                  </div>
-                  <a-input-search v-model:value="drawerOrgKeyword" placeholder="请输入组织名称" class="picker-search" />
-                  <div class="picker-body org-body">
-                    <a-tree
-                      v-model:selectedKeys="drawerOrgKeys"
-                      :tree-data="orgDrawerTreeData"
-                      :show-icon="false"
-                      default-expand-all
-                      block-node
-                    />
-                  </div>
-                </div>
-                <div class="picker-col">
-                  <div class="picker-head">
-                    <a-checkbox
-                      :checked="isAvailableAllChecked"
-                      :indeterminate="drawerAvailablePoints.length > 0 && !isAvailableAllChecked && drawerSelectedPoints.length > 0"
-                      :disabled="drawerAvailablePoints.length === 0"
-                      @change="(e) => toggleAllAvailablePoints(e.target.checked)"
-                    >
-                      <span class="picker-head-title">可选点位 ({{ drawerSelectedPoints.length }}/{{ drawerAvailablePoints.length }})</span>
-                    </a-checkbox>
-                  </div>
-                  <a-input-search v-model:value="drawerPointKeyword" placeholder="请输入点位名称">
-                    <template #suffix><span class="i-mdi-tag-outline" /></template>
-                  </a-input-search>
-                  <div class="picker-body">
-                    <div v-if="drawerAvailablePoints.length === 0" class="picker-empty">暂无可选点位</div>
-                    <div
-                      v-for="p in drawerAvailablePoints"
-                      :key="p.id"
-                      class="picker-row"
-                    >
-                      <a-checkbox
-                        :checked="draftSelectedPointIds.includes(p.id)"
-                        @change="(e) => togglePointSelection(p.id, e.target.checked)"
-                      >
-                        {{ p.name }}
-                      </a-checkbox>
-                    </div>
-                  </div>
-                </div>
-                <div class="picker-col">
-                  <div class="picker-head">
-                    <span class="picker-head-title">已选择点位 ({{ drawerSelectedPoints.length }})</span>
-                    <a class="link-action" @click="clearDrawerSelectedPoints">清空</a>
-                  </div>
-                  <div class="picker-placeholder-row" />
-                  <div class="picker-body selected-body">
-                    <div v-if="drawerSelectedPoints.length === 0" class="picker-empty">请选择左侧数据</div>
-                    <div
-                      v-for="p in drawerSelectedPoints"
-                      :key="p.id"
-                      class="picker-row picked"
-                    >
-                      <span class="picked-name">{{ p.name }}</span>
-                      <button class="picked-remove" type="button" @click="togglePointSelection(p.id, false)">
-                        <span class="i-mdi-close" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <CustomPointPicker
+                v-model="draftSelectedPointIds"
+                :point-options="orgPoints"
+                :org-tree-data="orgDrawerTreeData"
+              />
             </div>
           </div>
         </div>
@@ -2697,6 +2666,133 @@ function planLink(planId: string) {
   color: $brand-blue;
   cursor: pointer;
   font-size: 13px;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.guide-panel {
+  margin: 16px 16px 0;
+  padding: 18px 24px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.guide-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-primary;
+  margin-bottom: 14px;
+}
+
+.guide-steps {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.guide-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f3f7ff 0%, #fafbff 100%);
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.step-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: $brand-blue;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.step-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: $text-secondary;
+  line-height: 1.6;
+}
+
+.step-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+  color: $brand-blue;
+  font-size: 13px;
+  cursor: pointer;
+  width: fit-content;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  .i-mdi-open-in-new,
+  .i-mdi-chevron-right {
+    font-size: 14px;
+  }
+}
+
+.step-illu {
+  flex-shrink: 0;
+  width: 72px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b8c4dd;
+  font-size: 40px;
+}
+
+.guide-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c0c8d8;
+  font-size: 22px;
+}
+
+.guide-fade-enter-active,
+.guide-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.guide-fade-enter-from,
+.guide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 .detail-head {
@@ -3253,99 +3349,6 @@ function planLink(planId: string) {
   color: $text-regular;
   font-size: 12px;
   margin-bottom: 10px;
-}
-
-.point-picker {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  border: 1px solid $divider;
-  border-radius: 8px;
-  background: #fff;
-  padding: 12px;
-}
-
-.picker-col {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.picker-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  min-height: 24px;
-  font-size: 13px;
-  color: $text-primary;
-  gap: 6px;
-
-  :deep(.ant-checkbox-wrapper) {
-    white-space: nowrap;
-  }
-}
-
-.picker-head-title {
-  white-space: nowrap;
-}
-
-.picker-search {
-  width: 100%;
-}
-
-.picker-placeholder-row {
-  height: 32px;
-}
-
-.picker-body {
-  height: 180px;
-  border: 1px solid $divider;
-  border-radius: 6px;
-  padding: 6px 8px;
-  overflow-y: auto;
-  font-size: 13px;
-
-  &.org-body {
-    background: #fafbff;
-  }
-}
-
-.picker-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 0;
-
-  &.picked {
-    background: transparent;
-  }
-
-  .picked-name {
-    color: $brand-blue;
-  }
-
-  .picked-remove {
-    border: 0;
-    background: transparent;
-    color: $text-placeholder;
-    cursor: pointer;
-
-    &:hover {
-      color: $color-danger;
-    }
-  }
-}
-
-.picker-empty {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: $text-placeholder;
-  font-size: 12px;
 }
 
 .cycle-btn {
