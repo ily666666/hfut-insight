@@ -62,6 +62,12 @@ export const visionRoutes: RouteRecordRaw[] = [
         meta: { title: '预警记录', secondary: 'alarm-record', platform: 'vision' },
       },
       {
+        path: 'alarm-record/:id',
+        name: 'AlarmDetail',
+        component: () => import('@/platforms/vision/views/monitor/AlarmDetail.vue'),
+        meta: { title: '预警详情', secondary: 'alarm-record', platform: 'vision' },
+      },
+      {
         path: 'alarm-review',
         name: 'AlarmReview',
         component: () => import('@/platforms/vision/views/monitor/AlarmReview.vue'),

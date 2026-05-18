@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import dayjs, { type Dayjs } from 'dayjs';
-import type { TreeProps } from 'ant-design-vue';
+import { Modal, message, type TreeProps } from 'ant-design-vue';
 import { fetchAlarmRecords } from '@/platforms/vision/api';
 import type { AlarmRecord } from '@/platforms/vision/types/alarm';
 import AlarmRecordIcard from '@/platforms/vision/components/alarm/AlarmRecordIcard.vue';
@@ -154,6 +154,57 @@ function onOpenReviewRecords() {
 
 function toggleFilterPanel() {
   filterPanelOpen.value = !filterPanelOpen.value;
+}
+
+function onCardClick(alarm: AlarmRecord) {
+  if (batchMode.value) {
+    toggleSelect(alarm.id);
+    return;
+  }
+  router.push({
+    name: 'AlarmDetail',
+    params: { id: alarm.id },
+  });
+}
+
+function onCardMarkFalse(alarm: AlarmRecord) {
+  list.value = list.value.map((item) =>
+    item.id === alarm.id ? { ...item, status: 'invalid' as const } : item,
+  );
+  message.success(`已将「${alarm.title}」标记为误报`);
+}
+
+function onCardMarkRead(alarm: AlarmRecord) {
+  list.value = list.value.map((item) =>
+    item.id === alarm.id ? { ...item, read: true } : item,
+  );
+  message.success(`已将「${alarm.title}」标记为查阅`);
+}
+
+function onCardDelete(alarm: AlarmRecord) {
+  Modal.confirm({
+    title: '删除预警',
+    content: `确认删除预警「${alarm.title}」？删除后无法恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk() {
+      list.value = list.value.filter((item) => item.id !== alarm.id);
+      total.value = Math.max(0, total.value - 1);
+      message.success('预警已删除');
+    },
+  });
+}
+
+const favorites = ref<string[]>([]);
+function onCardFavorite(alarm: AlarmRecord) {
+  if (favorites.value.includes(alarm.id)) {
+    favorites.value = favorites.value.filter((id) => id !== alarm.id);
+    message.success('已取消收藏');
+  } else {
+    favorites.value = [...favorites.value, alarm.id];
+    message.success('已加入收藏');
+  }
 }
 
 onMounted(load);
@@ -428,9 +479,16 @@ onMounted(load);
                     'is-batch': batchMode,
                     'is-selected': selectedIds.includes(alarm.id),
                   }"
-                  @click="batchMode && toggleSelect(alarm.id)"
+                  @click="onCardClick(alarm)"
                 >
-                  <AlarmRecordIcard :alarm="alarm" />
+                  <AlarmRecordIcard
+                    :alarm="alarm"
+                    :favorite="favorites.includes(alarm.id)"
+                    @mark-false="onCardMarkFalse"
+                    @mark-read="onCardMarkRead"
+                    @delete="onCardDelete"
+                    @favorite="onCardFavorite"
+                  />
                   <a-checkbox
                     v-if="batchMode"
                     :checked="selectedIds.includes(alarm.id)"
