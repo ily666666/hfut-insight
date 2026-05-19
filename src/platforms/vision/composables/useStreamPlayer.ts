@@ -8,14 +8,10 @@ export interface StreamSource {
   protocol?: StreamProtocol;
 }
 
-function resolveProtocol(url: string, p?: StreamProtocol): 'hls' | 'flv' {
+function resolveProtocol(url: string, p?: StreamProtocol): 'hls' | 'flv' | 'mp4' {
   if (p === 'hls' || p === 'flv') return p;
-  if (p === 'auto') {
-    const u = url.toLowerCase();
-    if (u.includes('.m3u8') || u.includes('application/x-mpegurl')) return 'hls';
-    return 'flv';
-  }
   const u = url.toLowerCase();
+  if (u.includes('.mp4')) return 'mp4';
   if (u.includes('.m3u8') || u.includes('application/x-mpegurl')) return 'hls';
   return 'flv';
 }
@@ -60,6 +56,12 @@ export function useStreamPlayer(
       el.playsInline = true;
 
       const kind = resolveProtocol(src.url, src.protocol ?? 'auto');
+      if (kind === 'mp4') {
+        el.src = src.url;
+        void el.play().catch(() => {});
+        return;
+      }
+      
       if (kind === 'hls') {
         if (Hls.isSupported()) {
           hls = new Hls({

@@ -29,8 +29,8 @@ export interface CameraGroup {
   children?: Array<CameraGroup | CameraChannel>;
 }
 
-/** 画面布局：1/4/9/16 画面 */
-export type MonitorLayout = 1 | 4 | 9 | 16;
+/** 画面布局：1/2/4/9/16 画面 */
+export type MonitorLayout = 1 | 2 | 4 | 9 | 16;
 
 /** 一个画面块状态 */
 export interface MonitorSlot {

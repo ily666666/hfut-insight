@@ -137,6 +137,39 @@ export const visionRoutes: RouteRecordRaw[] = [
           platform: 'vision',
         },
       },
+      {
+        path: 'record-plan/config',
+        name: 'VideoRecordPlanConfig',
+        component: () => import('@/platforms/vision/views/video/PlanConfig.vue'),
+        meta: {
+          title: '配置录像计划',
+          secondary: 'record-plan',
+          platform: 'vision',
+          hideInMenu: true,
+        },
+      },
+      {
+        path: 'record-plan/detail/:id',
+        name: 'VideoRecordPlanDetail',
+        component: () => import('@/platforms/vision/views/video/PlanConfig.vue'),
+        meta: {
+          title: '录像计划详情',
+          secondary: 'record-plan',
+          platform: 'vision',
+          hideInMenu: true,
+        },
+      },
+      {
+        path: 'record-plan/edit/:id',
+        name: 'VideoRecordPlanEdit',
+        component: () => import('@/platforms/vision/views/video/PlanConfig.vue'),
+        meta: {
+          title: '编辑录像计划',
+          secondary: 'record-plan',
+          platform: 'vision',
+          hideInMenu: true,
+        },
+      },
     ],
   },
   {

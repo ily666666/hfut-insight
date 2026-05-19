@@ -7,12 +7,14 @@ dist-ssr
 *.log
 .env.local
 .env.*.local
+.history
 
 # editor
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 .idea
+.history
 
 # capture tool outputs
 tools/capture/node_modules

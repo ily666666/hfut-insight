@@ -36,11 +36,11 @@ function openAlarmRecord() {
         :alarm="alarm"
         @click="store.markRead(alarm.id)"
       />
-      <div v-if="!displayList.length" class="empty">暂无预警</div>
+      <div v-if="!displayList.length" class="empty">今日暂无预警</div>
     </div>
 
     <div class="footer">
-      <button type="button" class="more" @click="openAlarmRecord">查看更多</button>
+      <button type="button" class="more" @click="openAlarmRecord">查看更多 &rsaquo;</button>
     </div>
   </aside>
 </template>
@@ -62,7 +62,7 @@ function openAlarmRecord() {
 }
 
 .header {
-  padding: 12px 14px 8px;
+  padding: 14px 14px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -120,20 +120,31 @@ input:checked + .checkbox-square {
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #d1d9ec;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 .empty {
-  color: $text-placeholder;
-  font-size: 12px;
+  color: #999;
+  font-size: 13px;
   text-align: center;
-  padding: 40px 0;
+  margin: auto 0;
 }
 
 .footer {
   flex: 0 0 auto;
   border-top: 1px solid $divider;
-  padding: 8px 14px;
-  text-align: right;
+  padding: 8px 0;
+  text-align: center;
 }
 
 .more {
@@ -141,17 +152,12 @@ input:checked + .checkbox-square {
   padding: 0;
   background: none;
   cursor: pointer;
-  color: $text-regular;
+  color: #666;
   font-size: 12px;
   transition: color 0.12s;
 
   &:hover {
     color: $brand-blue;
-  }
-
-  &::after {
-    content: '›';
-    margin-left: 4px;
   }
 }
 </style>

@@ -32,30 +32,24 @@ function formatRelativeTime(value: string) {
 
 <template>
   <div class="alarm-card">
-    <div class="image">
-      <img
-        v-if="alarm.thumbnail && !imageError"
-        :src="alarm.thumbnail"
-        :alt="alarm.title"
-        draggable="false"
-        @error="onImageError"
-      />
-      <div v-else class="image-placeholder">
-        <span class="i-mdi-image-outline placeholder-icon" />
-      </div>
-      <div class="level">{{ levelText[alarm.level] || `${alarm.level}级` }}</div>
+    <div class="thumbnail">
+      <img v-if="alarm.thumbnail && !imageError" :src="alarm.thumbnail" :alt="alarm.title" @error="onImageError" />
+      <div v-else class="image-placeholder"><span class="i-mdi-image-outline" /></div>
+      <div class="level-tag">{{ levelText[alarm.level] || `${alarm.level}级` }}</div>
     </div>
-    <div class="title">{{ alarm.title }}</div>
-    <div class="sub">{{ alarm.pointName }}</div>
-    <div class="time">{{ formatRelativeTime(props.alarm.startTime) }}</div>
+    <div class="content">
+      <div class="type">{{ alarm.title }}</div>
+      <div class="source">{{ alarm.pointName }}</div>
+      <div class="time">{{ formatRelativeTime(props.alarm.startTime) }}</div>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .alarm-card {
   background: $bg-white;
-  border: 1px solid $divider;
-  border-radius: $radius-md;
+  border: 1px solid #e8edf6;
+  border-radius: 8px;
   padding: 6px;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -69,17 +63,16 @@ function formatRelativeTime(value: string) {
 .image {
   position: relative;
   width: 100%;
-  height: 98px;
-  border-radius: $radius-sm;
+  height: 86px;
+  border-radius: 4px;
   overflow: hidden;
-  background: $video-bg-2;
-  margin-bottom: 6px;
+  background: #02060f;
+  margin-bottom: 8px;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
   }
 }
 
@@ -93,8 +86,8 @@ function formatRelativeTime(value: string) {
 }
 
 .placeholder-icon {
-  font-size: 28px;
-  color: rgba(255, 255, 255, 0.25);
+  font-size: 24px;
+  color: #4b5f8e;
 }
 
 .level {
@@ -104,35 +97,32 @@ function formatRelativeTime(value: string) {
   padding: 2px 6px;
   font-size: 11px;
   color: #fff;
-  background: $brand-blue;
+  background: #2d55e5;
   border-radius: 3px;
   line-height: 1.4;
+  z-index: 1;
 }
 
-.title {
+.content {
+  padding: 0 2px;
+}
+
+.type {
   font-size: 13px;
-  color: $text-primary;
-  font-weight: 500;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 4px;
 }
 
-.sub {
+.source {
   font-size: 12px;
-  color: $text-secondary;
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: #666;
+  margin-bottom: 2px;
 }
 
 .time {
   font-size: 12px;
-  color: $text-placeholder;
-  margin-top: 4px;
+  color: #999;
 }
 </style>
 

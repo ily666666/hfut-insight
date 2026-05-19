@@ -141,6 +141,9 @@ export const useMonitorStore = defineStore('monitor', () => {
     slots,
     allChannels,
     filteredTree,
+    activeCameras: ref([]), // Mock shim
+    expandedKeys: ref([]), // Mock shim
+    selectedKeys: ref([]), // Mock shim
     loadCameraTree,
     setLayout,
     selectSlot,
