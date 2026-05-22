@@ -216,6 +216,17 @@ export const visionRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'rules/editor',
+        name: 'SopRuleEditor',
+        component: () => import('@/platforms/vision/views/sop/SopRuleEditor.vue'),
+        meta: {
+          title: '创建SOP规则',
+          secondary: 'rules',
+          platform: 'vision',
+          hideInMenu: true,
+        },
+      },
+      {
         path: 'notification',
         name: 'SopNotification',
         component: () => import('@/platforms/vision/views/sop/SopNotification.vue'),
@@ -224,6 +235,17 @@ export const visionRoutes: RouteRecordRaw[] = [
           secondary: 'sop-notification',
           pageActions: listPage,
           platform: 'vision',
+        },
+      },
+      {
+        path: 'notification/editor',
+        name: 'SopNotificationEditor',
+        component: () => import('@/platforms/vision/views/sop/SopNotificationEditor.vue'),
+        meta: {
+          title: '创建预警通知规则',
+          secondary: 'sop-notification',
+          platform: 'vision',
+          hideInMenu: true,
         },
       },
       {
