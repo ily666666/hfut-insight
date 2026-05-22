@@ -1,69 +1,226 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { message } from 'ant-design-vue';
 
-const limitEnabled = ref(true);
-const policy = ref<'overwrite' | 'stop'>('overwrite');
+type StoragePolicy = 'overwrite' | 'stop';
+type StorageConfig = {
+  limitEnabled: boolean;
+  totalLimit: number;
+  pointLimit: number;
+  policy: StoragePolicy;
+};
 
-const storageCards = [
-  { title: '总存储量', value: '1000-100000', desc: '系统允许存储的 SOP 非标准作业预警视频总数量上限。' },
-  { title: '单点位上限', value: '不超过总量', desc: '单个摄像头产生的非标准作业预警视频数量上限。' },
-  { title: '不足动作', value: '覆盖/停止', desc: '达到上限后覆盖历史视频，或停止产生新的非标准预警事件。' },
-];
+const STORAGE_KEY = 'hfut_sop_alarm_storage_config';
+
+const limitEnabled = ref(true);
+const totalLimit = ref<number | null>(10000);
+const pointLimit = ref<number | null>(1000);
+const policy = ref<StoragePolicy>('overwrite');
+
+const totalLimitError = ref('');
+const pointLimitError = ref('');
+
+function clampNumber(v: unknown, min: number, max: number, fallback: number) {
+  const n = typeof v === 'number' ? v : Number(v);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, Math.floor(n)));
+}
+
+function validateTotalLimit() {
+  if (!limitEnabled.value) {
+    totalLimitError.value = '';
+    return true;
+  }
+  if (totalLimit.value === null || totalLimit.value === undefined || totalLimit.value === ('' as any)) {
+    totalLimitError.value = '预警视频总存储量不可为空';
+    return false;
+  }
+  if (!Number.isFinite(totalLimit.value)) {
+    totalLimitError.value = '预警视频总存储量不可为空';
+    return false;
+  }
+  if (totalLimit.value < 1000 || totalLimit.value > 100000) {
+    totalLimitError.value = '预警视频总存储量需在 1000 ～ 100000 范围内';
+    return false;
+  }
+  totalLimitError.value = '';
+  return true;
+}
+
+function validatePointLimit() {
+  if (!limitEnabled.value) {
+    pointLimitError.value = '';
+    return true;
+  }
+  if (pointLimit.value === null || pointLimit.value === undefined || pointLimit.value === ('' as any)) {
+    pointLimitError.value = '单点位预警视频存储量不可为空';
+    return false;
+  }
+  if (!Number.isFinite(pointLimit.value)) {
+    pointLimitError.value = '单点位预警视频存储量不可为空';
+    return false;
+  }
+  if (pointLimit.value < 1) {
+    pointLimitError.value = '单点位预警视频存储量不可为空';
+    return false;
+  }
+  if (typeof totalLimit.value === 'number' && Number.isFinite(totalLimit.value) && pointLimit.value > totalLimit.value) {
+    pointLimitError.value = '单摄像头预警视频存储量不可超过预警视频总存储量';
+    return false;
+  }
+  pointLimitError.value = '';
+  return true;
+}
+
+function validateAll() {
+  const a = validateTotalLimit();
+  const b = validatePointLimit();
+  return a && b;
+}
+
+function normalizeForSave() {
+  if (typeof totalLimit.value === 'number' && Number.isFinite(totalLimit.value)) {
+    totalLimit.value = clampNumber(totalLimit.value, 1000, 100000, 10000);
+  }
+  const safeTotal = typeof totalLimit.value === 'number' && Number.isFinite(totalLimit.value) ? totalLimit.value : 10000;
+  if (typeof pointLimit.value === 'number' && Number.isFinite(pointLimit.value)) {
+    pointLimit.value = clampNumber(pointLimit.value, 1, safeTotal, 1000);
+  }
+}
+
+function saveConfig() {
+  const payload: StorageConfig = {
+    limitEnabled: !!limitEnabled.value,
+    totalLimit: typeof totalLimit.value === 'number' && Number.isFinite(totalLimit.value) ? totalLimit.value : 10000,
+    pointLimit: typeof pointLimit.value === 'number' && Number.isFinite(pointLimit.value) ? pointLimit.value : 1000,
+    policy: policy.value,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Partial<StorageConfig> | null;
+    if (!parsed || typeof parsed !== 'object') return;
+    if (typeof parsed.limitEnabled === 'boolean') limitEnabled.value = parsed.limitEnabled;
+    totalLimit.value = clampNumber(parsed.totalLimit, 1000, 100000, 10000);
+    pointLimit.value = clampNumber(parsed.pointLimit, 1, totalLimit.value ?? 10000, 1000);
+    policy.value = parsed.policy === 'stop' ? 'stop' : 'overwrite';
+  } catch {}
+}
 
 function onSave() {
-  message.success('已保存（仿真）');
+  if (limitEnabled.value) {
+    const ok = validateAll();
+    if (!ok) {
+      message.error('请检查输入项');
+      return;
+    }
+  }
+  normalizeForSave();
+  saveConfig();
+  message.success('保存成功');
 }
 
 function onReset() {
-  limitEnabled.value = true;
+  limitEnabled.value = false;
+  totalLimit.value = 10000;
+  pointLimit.value = 1000;
   policy.value = 'overwrite';
-  message.info('已重置为默认');
+  totalLimitError.value = '';
+  pointLimitError.value = '';
+  saveConfig();
+  message.success('已重置');
 }
+
+watch(limitEnabled, (v) => {
+  if (!v) {
+    totalLimitError.value = '';
+    pointLimitError.value = '';
+  }
+});
+
+watch(totalLimit, () => {
+  if (!limitEnabled.value) return;
+  validateTotalLimit();
+  validatePointLimit();
+});
+
+watch(pointLimit, () => {
+  if (!limitEnabled.value) return;
+  validatePointLimit();
+});
+
+onMounted(() => {
+  loadConfig();
+  validateAll();
+});
 </script>
 
 <template>
-  <div class="biz-page">
-    <div class="page-shell">
-      <header class="page-head">
-        <h1 class="page-title">预警存储</h1>
-        <p>控制 SOP 非标准作业预警视频的总量、单点位存储量和存储不足时的执行动作。</p>
-      </header>
+  <div class="official-page alarm-storage-page">
+    <div class="official-page-head">
+      <h1 class="official-page-title">预警存储</h1>
+    </div>
 
-      <section class="storage-grid">
-        <article v-for="item in storageCards" :key="item.title" class="storage-card">
-          <span>{{ item.title }}</span>
-          <strong>{{ item.value }}</strong>
-          <p>{{ item.desc }}</p>
-        </article>
-      </section>
+    <div class="official-card page-card">
+      <div class="storage-form">
+        <div class="storage-item">
+          <div class="storage-label required">预警存储上限设置</div>
+          <div class="storage-control">
+            <a-switch v-model:checked="limitEnabled" checked-children="开启" un-checked-children="关闭" />
+          </div>
+        </div>
 
-      <div class="form-body">
-        <a-form :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-          <a-form-item label="存储上限设置">
-            <a-space direction="vertical">
-              <a-switch v-model:checked="limitEnabled" checked-children="开" un-checked-children="关" />
-              <span class="hint">关闭后不执行预警视频数量不足动作。</span>
-            </a-space>
-          </a-form-item>
-          <a-form-item label="预警视频总存储量">
-            <a-input-number :disabled="!limitEnabled" :min="1000" :max="100000" :value="10000" style="width: 220px" />
-            <span class="hint inline-hint">支持 1000～100000。</span>
-          </a-form-item>
-          <a-form-item label="单点位视频存储量">
-            <a-input-number :disabled="!limitEnabled" :min="1" :max="10000" :value="500" style="width: 220px" />
-            <span class="hint inline-hint">不可超过总存储量。</span>
-          </a-form-item>
-          <a-form-item label="存储不足执行动作">
-            <a-radio-group v-model:value="policy" :disabled="!limitEnabled">
+        <div v-if="limitEnabled" class="storage-item">
+          <div class="storage-label required">预警视频总存储量</div>
+          <div class="storage-control" :class="{ 'is-error': !!totalLimitError }">
+            <a-input-number
+              v-model:value="totalLimit"
+              :min="1000"
+              :max="100000"
+              placeholder="请输入预警视频总存储量"
+              style="width: 260px"
+              @blur="validateTotalLimit"
+              @update:value="validateTotalLimit"
+              @change="validateTotalLimit"
+            />
+            <div v-if="totalLimitError" class="storage-error">{{ totalLimitError }}</div>
+            <div v-else class="storage-help">支持范围 1000 ～ 100000</div>
+          </div>
+        </div>
+
+        <div v-if="limitEnabled" class="storage-item">
+          <div class="storage-label required">单点位预警视频存储量</div>
+          <div class="storage-control" :class="{ 'is-error': !!pointLimitError }">
+            <a-input-number
+              v-model:value="pointLimit"
+              :min="1"
+              placeholder="请输入单点位预警视频存储量"
+              style="width: 260px"
+              @blur="validatePointLimit"
+              @update:value="validatePointLimit"
+              @change="validatePointLimit"
+            />
+            <div v-if="pointLimitError" class="storage-error">{{ pointLimitError }}</div>
+          </div>
+        </div>
+
+        <div class="storage-item">
+          <div class="storage-label required">存储数量不足执行动作</div>
+          <div class="storage-control">
+            <a-radio-group v-model:value="policy">
               <a-radio value="overwrite">覆盖已有预警视频，并弹窗提示</a-radio>
               <a-radio value="stop">不产生新预警事件，并弹窗提示</a-radio>
             </a-radio-group>
-          </a-form-item>
-        </a-form>
-        <div class="form-actions">
-          <a-button type="primary" @click="onSave">保存</a-button>
-          <a-button @click="onReset">重置</a-button>
+          </div>
+        </div>
+
+        <div class="storage-actions">
+          <a-button type="primary" class="save-btn" @click="onSave">保存</a-button>
+          <a-button class="reset-btn" @click="onReset">重置</a-button>
         </div>
       </div>
     </div>
@@ -71,94 +228,79 @@ function onReset() {
 </template>
 
 <style lang="scss" scoped>
-.biz-page {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  overflow: auto;
-  background: $bg-white;
-  padding: 0 16px 16px;
+.page-card {
+  min-height: calc(100vh - 108px);
+  padding: 0 0 24px;
 }
 
-.page-shell {
-  background: $bg-white;
-  padding-bottom: 24px;
+.storage-form {
+  max-width: 720px;
+  padding: 20px 24px 0 20px;
 }
 
-.page-head {
-  padding: 16px 20px;
-  border-bottom: 1px solid $divider;
-
-  p {
-    margin: 8px 0 0;
-    color: $text-secondary;
-  }
-}
-
-.page-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.storage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  padding: 16px 20px 0;
-}
-
-.storage-card {
-  padding: 16px;
-  border: 1px solid #e6eefc;
-  border-radius: 14px;
-  background: #fbfdff;
-
-  span,
-  strong {
-    display: block;
-  }
-
-  span {
-    color: $text-secondary;
-  }
-
-  strong {
-    margin: 8px 0;
-    color: $text-primary;
-    font-size: 20px;
-  }
-
-  p {
-    margin: 0;
-    color: $text-secondary;
-    line-height: 1.6;
-  }
-}
-
-.form-body {
-  max-width: 900px;
-  padding: 24px 20px 0;
-}
-
-.hint {
-  font-size: 12px;
-  color: $text-secondary;
-}
-
-.inline-hint {
-  margin-left: 10px;
-}
-
-.form-actions {
-  padding-left: 25%;
+.storage-item {
   display: flex;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
 }
 
-@media (max-width: 1080px) {
-  .storage-grid {
-    grid-template-columns: 1fr;
-  }
+.storage-label {
+  width: 160px;
+  flex: 0 0 160px;
+  font-size: 12px;
+  color: #1f2329;
+  line-height: 22px;
+}
+
+.storage-label.required::after {
+  content: '*';
+  color: #f53f3f;
+  margin-left: 4px;
+}
+
+.storage-control {
+  flex: 1;
+  min-width: 0;
+  line-height: 22px;
+}
+
+.storage-help {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #86909c;
+}
+
+.storage-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #f53f3f;
+}
+
+.storage-control.is-error :deep(.ant-input-number) {
+  border-color: #f53f3f !important;
+}
+
+.storage-control.is-error :deep(.ant-input-number:hover) {
+  border-color: #f53f3f !important;
+}
+
+.storage-control.is-error :deep(.ant-input-number-focused) {
+  border-color: #f53f3f !important;
+  box-shadow: 0 0 0 2px rgba(245, 63, 63, 0.2) !important;
+}
+
+.storage-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
+  padding-left: 0;
+}
+
+.save-btn,
+.reset-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 6px;
 }
 </style>

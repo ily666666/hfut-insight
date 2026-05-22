@@ -1,27 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { DEMO_ORG_ID, DEMO_POINT_NAME } from '@/platforms/vision/constants/demo-data';
+import { useRouter } from 'vue-router';
+import { useFullscreen } from '@vueuse/core';
 
-const selectedKeys = ref<string[]>([DEMO_ORG_ID]);
+const router = useRouter();
 const alarming = ref(false);
-const activeRule = ref('forklift');
 
-const sopRules = [
-  { label: '叉车装卸作业SOP', value: 'forklift' },
-  { label: '高处作业防护SOP', value: 'height' },
-];
+const screenPreviewRef = ref<HTMLElement | null>(null);
+const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(screenPreviewRef);
 
-const stepRows = [
-  { step: '开始作业', status: '正确执行', duration: '00:12', reason: '识别到车辆进入装卸区' },
-  { step: '人员避让', status: '异常', duration: '00:48', reason: '非作业人员进入电子围栏' },
-  { step: '车辆限速', status: '未开始', duration: '--', reason: '等待上一步恢复' },
-  { step: '结束确认', status: '未开始', duration: '--', reason: '工序未结束' },
-];
-
-const processRows = [
-  { name: '完整工序', time: '2026-04-29 10:00:00 ~ 10:08:42', duration: '8分42秒', result: '执行中' },
-  { name: '异常步骤', time: '人员避让', duration: '已持续48秒', result: '顺序执行错误 / 人员闯入' },
-];
+const goToRules = () => {
+  router.push('/vision/sop/rules');
+};
 </script>
 
 <template>
@@ -32,68 +22,52 @@ const processRows = [
     <div class="official-card page-card">
       <div class="workspace">
         <aside class="left-panel">
-          <div class="panel-header">点位列表</div>
-          <div class="panel-toolbar">
+          <div class="panel-header-row">
+            <span class="panel-header">点位列表</span>
             <a-checkbox v-model:checked="alarming">预警中</a-checkbox>
-            <button class="text-btn" type="button">
-              <span class="i-mdi-arrow-expand-all" />
-              充满窗口
-            </button>
-            <button class="text-btn" type="button">
-              <span class="i-mdi-close-box-outline" />
-              清空画面
-            </button>
           </div>
-          <a-input-search placeholder="请输入点位名称搜索" />
+          <a-input-search placeholder="请输入点位名称搜索" class="search-input" />
           <div class="panel-hint">
-            已开启<a>SOP规则</a>，在线点位可双击或拖拽到监控面板。
+            <span class="hint-text">请先配置并开启</span><a @click="goToRules">SOP规则</a>
           </div>
-          <a-tree
-            v-model:selectedKeys="selectedKeys"
-            class="org-tree"
-            :tree-data="[{ key: DEMO_ORG_ID, title: DEMO_ORG_ID, children: [{ key: DEMO_POINT_NAME, title: `${DEMO_POINT_NAME} · 在线 · 已添加` }] }]"
-            default-expand-all
-          />
         </aside>
 
         <section class="main-panel">
           <div class="screen-card">
             <div class="screen-toolbar">
-              <a-select v-model:value="activeRule" :options="sopRules" style="width: 220px" />
-              <a-button>1分屏</a-button>
-              <a-button>4分屏</a-button>
-              <a-button>9分屏</a-button>
-              <a-button>全屏监控</a-button>
+              <div class="toolbar-left">
+                <button class="text-btn" type="button">
+                  <span class="i-mdi-arrow-expand-all" />
+                  充满窗口
+                </button>
+                <button class="text-btn" type="button">
+                  <span class="i-mdi-close-box-outline" />
+                  清空画面
+                </button>
+              </div>
+              <div class="toolbar-right">
+                <button class="text-btn" type="button" @click="toggleFullscreen">
+                  <span :class="isFullscreen ? 'i-mdi-fullscreen-exit' : 'i-mdi-fullscreen'" />
+                  {{ isFullscreen ? '退出全屏' : '全屏监控' }}
+                </button>
+              </div>
             </div>
-            <div class="screen-preview">
-              <span class="i-mdi-video-outline" />
-              <p>{{ DEMO_POINT_NAME }} 实时画面</p>
-              <em>可切换充满窗口 / 适应窗口，悬停支持全屏查看与移除。</em>
+            <div class="screen-preview" ref="screenPreviewRef" @dblclick="toggleFullscreen">
+              <div v-if="isFullscreen" class="fullscreen-header">
+                <div class="fullscreen-title">baidu.com - 要退出全屏，请按 <span>Esc</span></div>
+                <button class="text-btn exit-fullscreen-btn" @click.stop="toggleFullscreen">
+                  <span class="i-mdi-fullscreen-exit" />
+                  退出全屏
+                </button>
+              </div>
+              <span class="i-mdi-monitor-share" />
+              <p>请先选择点位，支持双击或拖拽</p>
             </div>
           </div>
 
-          <div class="analysis-card">
+          <div class="analysis-card empty-analysis">
             <div class="divider-handle" />
-            <section class="step-panel">
-              <div class="panel-title">作业步骤</div>
-              <div class="step-grid">
-                <article v-for="item in stepRows" :key="item.step" :class="['step-card', { 'is-error': item.status === '异常' }]">
-                  <strong>{{ item.step }}</strong>
-                  <a-tag :color="item.status === '正确执行' ? 'green' : item.status === '异常' ? 'red' : 'default'">{{ item.status }}</a-tag>
-                  <span>{{ item.duration }}</span>
-                  <p>{{ item.reason }}</p>
-                </article>
-              </div>
-            </section>
-            <section class="process-panel">
-              <div class="panel-title">作业过程</div>
-              <a-table :data-source="processRows" row-key="name" size="small" :pagination="false">
-                <a-table-column title="过程" data-index="name" key="name" width="120" />
-                <a-table-column title="时间" data-index="time" key="time" />
-                <a-table-column title="用时" data-index="duration" key="duration" width="120" />
-                <a-table-column title="结果" data-index="result" key="result" />
-              </a-table>
-            </section>
+            <div class="empty-text">请先选择点位，将实时进行合规分析</div>
           </div>
         </section>
       </div>
@@ -119,18 +93,16 @@ const processRows = [
   border-right: 1px solid $divider;
 }
 
+.panel-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .panel-header {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.panel-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
 }
 
 .text-btn {
@@ -140,19 +112,34 @@ const processRows = [
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
 }
 
 .panel-hint {
   padding: 16px 0 12px;
   color: #3d4863;
+  text-align: left;
+
+  .hint-text {
+    color: #1f2329; /* Black color for the prefix text */
+  }
 
   a {
     color: $brand-blue;
+    cursor: pointer;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
   }
-}
-
-.org-tree {
-  margin-top: 8px;
 }
 
 .main-panel {
@@ -176,14 +163,19 @@ const processRows = [
 
 .screen-toolbar {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 14px 0;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  gap: 16px;
 }
 
 .screen-preview {
-  height: calc(100% - 56px);
+  height: calc(100% - 48px);
   background:
     linear-gradient(rgba(69, 95, 151, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(69, 95, 151, 0.08) 1px, transparent 1px),
@@ -197,15 +189,56 @@ const processRows = [
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  position: relative;
 
-  span {
+  span.i-mdi-monitor-share {
     font-size: 34px;
     margin-bottom: 12px;
   }
+}
 
-  em {
-    color: rgba(255, 255, 255, 0.62);
-    font-style: normal;
+.fullscreen-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 100;
+
+  .fullscreen-title {
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    
+    span {
+      display: inline-block;
+      padding: 2px 6px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 2px;
+      margin-left: 4px;
+      font-size: 12px;
+    }
+  }
+
+  .exit-fullscreen-btn {
+    position: absolute;
+    right: 24px;
+    top: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2329;
+    border-radius: 4px;
+    padding: 6px 12px;
+    
+    &:hover {
+      background: #fff;
+    }
   }
 }
 
@@ -214,9 +247,15 @@ const processRows = [
   min-height: 330px;
   margin-top: 16px;
   padding: 18px;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 16px;
+  background: #fff;
+}
+
+.empty-analysis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #86909c;
+  font-size: 14px;
 }
 
 .divider-handle {
@@ -228,46 +267,6 @@ const processRows = [
   border-radius: 999px;
   background: #cfd7e7;
   transform: translateX(-50%);
-}
-
-.panel-title {
-  margin-bottom: 12px;
-  color: $text-primary;
-  font-weight: 600;
-}
-
-.step-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.step-card {
-  display: grid;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid #e6eefc;
-  border-radius: 12px;
-  background: #fbfdff;
-
-  strong {
-    color: $text-primary;
-  }
-
-  span,
-  p {
-    color: $text-secondary;
-  }
-
-  p {
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  &.is-error {
-    border-color: #ffccc7;
-    background: #fff7f6;
-  }
 }
 
 @media (max-width: 1080px) {

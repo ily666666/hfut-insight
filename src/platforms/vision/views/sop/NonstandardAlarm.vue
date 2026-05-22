@@ -1,30 +1,35 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import dayjs, { type Dayjs } from 'dayjs';
-import { message } from 'ant-design-vue';
 import { fetchSopNonstandardAlarms } from '@/platforms/vision/api';
 import type { SopNonstandardAlarmRow } from '@/platforms/vision/types/sop';
 
-const loading = ref(false);
-const list = ref<SopNonstandardAlarmRow[]>([]);
-const total = ref(0);
+const fetching = ref(false);
+const querying = ref(false);
+const rawList = ref<SopNonstandardAlarmRow[]>([]);
 const page = ref(1);
 const pageSize = ref(10);
 
-const dateRange = ref<[Dayjs, Dayjs]>([
-  dayjs().subtract(7, 'day'),
-  dayjs(),
-]);
-const status = ref<string | undefined>(undefined);
-const org = ref<string | undefined>(undefined);
-const dataSource = ref<string | undefined>(undefined);
-const keyword = ref('');
+const filterOpen = ref(false);
+const dateRange = ref<[Dayjs, Dayjs] | null>(null);
+const status = ref<string>('全部');
+const org = ref<string>('全部');
+const dataSource = ref('');
+const ruleId = ref('');
+const ruleName = ref('');
+const alarmName = ref('');
 
-const detailCards = [
-  { title: '预警详情', desc: '展示数据源、组织、规则名称、预警步骤和预警时间。' },
-  { title: '处理进展', desc: '记录处理人、有效/无效判定、处理意见和状态流转。' },
-  { title: '作业过程', desc: '展示总耗时、非标准步骤、每一步执行时间和异常原因。' },
-  { title: '证据材料', desc: '支持步骤抓拍图、前后 15 秒事件视频和实时监控画面。' },
+const hasSearched = ref(false);
+
+const statusOptions = [
+  { label: '全部', value: '全部' },
+  { label: '待处理', value: '待处理' },
+  { label: '已处理', value: '已处理' },
+];
+
+const orgOptions = [
+  { label: '全部', value: '全部' },
+  { label: '665278304a', value: '665278304a' },
 ];
 
 const processRows = [
@@ -43,209 +48,388 @@ const columns = [
   { title: '操作', key: 'action', width: 220 },
 ];
 
-async function load() {
-  loading.value = true;
+const hasActiveFilters = computed(() => {
+  return (
+    !!dateRange.value?.[0] ||
+    status.value !== '全部' ||
+    org.value !== '全部' ||
+    !!dataSource.value.trim() ||
+    !!ruleId.value.trim() ||
+    !!ruleName.value.trim() ||
+    !!alarmName.value.trim()
+  );
+});
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (dateRange.value?.[0] && dateRange.value?.[1]) count += 1;
+  if (status.value !== '全部') count += 1;
+  if (org.value !== '全部') count += 1;
+  if (dataSource.value.trim()) count += 1;
+  if (ruleId.value.trim()) count += 1;
+  if (ruleName.value.trim()) count += 1;
+  if (alarmName.value.trim()) count += 1;
+  return count;
+});
+
+const filteredList = computed(() => {
+  const qDataSource = dataSource.value.trim().toLowerCase();
+  const qRuleId = ruleId.value.trim().toLowerCase();
+  const qRuleName = ruleName.value.trim().toLowerCase();
+  const qAlarmName = alarmName.value.trim().toLowerCase();
+  const start = dateRange.value?.[0] ? dayjs(dateRange.value[0]).startOf('day') : null;
+  const end = dateRange.value?.[1] ? dayjs(dateRange.value[1]).endOf('day') : null;
+
+  return rawList.value.filter((r) => {
+    if (status.value !== '全部' && r.status !== status.value) return false;
+    if (org.value !== '全部' && r.orgName !== org.value) return false;
+    if (qDataSource && !r.dataSource.toLowerCase().includes(qDataSource)) return false;
+    if (qRuleName && !r.ruleName.toLowerCase().includes(qRuleName)) return false;
+    if (qAlarmName && !r.name.toLowerCase().includes(qAlarmName)) return false;
+    if (qRuleId && !r.id.toLowerCase().includes(qRuleId)) return false;
+    if (start && end) {
+      const t = dayjs(r.alarmTime);
+      if (t.isValid() && (t.isBefore(start) || t.isAfter(end))) return false;
+    }
+    return true;
+  });
+});
+
+const total = computed(() => filteredList.value.length);
+const pagedList = computed(() => {
+  const start = (page.value - 1) * pageSize.value;
+  return filteredList.value.slice(start, start + pageSize.value);
+});
+
+async function fetchAll() {
+  fetching.value = true;
   try {
-    const res = await fetchSopNonstandardAlarms({
-      page: page.value,
-      pageSize: pageSize.value,
-    });
-    list.value = res.list;
-    total.value = res.total;
+    const res = await fetchSopNonstandardAlarms({ page: 1, pageSize: 200 });
+    rawList.value = res.list;
   } finally {
-    loading.value = false;
+    fetching.value = false;
   }
 }
 
-function onSearch() {
+async function onQuery() {
+  hasSearched.value = true;
   page.value = 1;
-  void load();
+  querying.value = true;
+  const started = Date.now();
+  try {
+    await fetchAll();
+  } finally {
+    const wait = Math.max(0, 650 - (Date.now() - started));
+    if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+    querying.value = false;
+  }
 }
 
-function onStub() {
-  message.info('界面仿真：接入后端后生效');
+function onReset() {
+  dateRange.value = null;
+  status.value = '全部';
+  org.value = '全部';
+  dataSource.value = '';
+  ruleId.value = '';
+  ruleName.value = '';
+  alarmName.value = '';
+  hasSearched.value = true;
+  page.value = 1;
+  void onQuery();
 }
 
-onMounted(load);
+function onRefresh() {
+  hasSearched.value = true;
+  page.value = 1;
+  void onQuery();
+}
+
+onMounted(async () => {
+  await fetchAll();
+});
 </script>
 
 <template>
-  <div class="biz-page">
-    <div class="page-shell">
-      <header class="page-head">
-        <h1 class="page-title">非标准作业预警</h1>
-        <div class="page-actions">
-          <a-button type="primary" @click="onStub">筛选</a-button>
-          <a-button @click="load">刷新</a-button>
+  <div class="alarm-page">
+    <div class="alarm-shell">
+      <header class="official-page-head">
+        <h1 class="official-page-title">非标准作业预警</h1>
+        <div class="official-toolbar">
+          <a-button shape="circle" class="icon-btn" @click="onRefresh">
+            <template #icon><span class="i-mdi-refresh" /></template>
+          </a-button>
         </div>
       </header>
 
-      <section class="detail-guide">
-        <article v-for="item in detailCards" :key="item.title" class="detail-card">
-          <strong>{{ item.title }}</strong>
-          <p>{{ item.desc }}</p>
-        </article>
+      <section class="alarm-filter">
+        <div class="filter-top">
+          <a-button class="filter-toggle" :class="{ active: filterOpen }" @click="filterOpen = !filterOpen">
+            <template #icon><span class="i-mdi-filter-variant" /></template>
+            筛选
+            <span v-if="activeFilterCount" class="filter-count">{{ activeFilterCount }}</span>
+          </a-button>
+        </div>
+
+        <div v-show="filterOpen" class="filter-panel">
+          <div class="filter-grid">
+            <div class="filter-item">
+              <span class="filter-label">预警日期</span>
+              <a-range-picker
+                v-model:value="dateRange"
+                class="filter-control"
+                allow-clear
+                :placeholder="['开始日期', '结束日期']"
+              />
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">处理状态</span>
+              <a-select v-model:value="status" class="filter-control" :options="statusOptions" />
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">所属组织</span>
+              <a-select v-model:value="org" class="filter-control" :options="orgOptions" />
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">数据源</span>
+              <a-input v-model:value="dataSource" allow-clear placeholder="请输入点位源" class="filter-control" />
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">规则名称</span>
+              <a-input v-model:value="ruleName" allow-clear placeholder="请输入规则名称" class="filter-control" />
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">规则ID</span>
+              <a-input v-model:value="ruleId" allow-clear placeholder="请输入规则ID" class="filter-control" />
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">预警名称</span>
+              <a-input v-model:value="alarmName" allow-clear placeholder="请输入预警名称" class="filter-control" />
+            </div>
+          </div>
+          <div class="filter-actions">
+            <a-button class="btn-reset" :disabled="!hasActiveFilters" @click="onReset">重置</a-button>
+            <a-button type="primary" class="btn-query" :loading="querying" @click="onQuery">查询</a-button>
+          </div>
+        </div>
       </section>
 
-      <div class="filter-card">
-        <a-form layout="inline" class="filter-form">
-          <a-form-item label="预警日期">
-            <a-range-picker v-model:value="dateRange" />
-          </a-form-item>
-          <a-form-item label="处理状态">
-            <a-select
-              v-model:value="status"
-              allow-clear
-              placeholder="全部"
-              style="width: 140px"
-              :options="[
-                { value: 'pending', label: '待处理' },
-                { value: 'done', label: '已处理' },
-              ]"
-            />
-          </a-form-item>
-          <a-form-item label="组织">
-            <a-select
-              v-model:value="org"
-              allow-clear
-              placeholder="全部"
-              style="width: 160px"
-              :options="[{ value: '123456789', label: '123456789' }]"
-            />
-          </a-form-item>
-          <a-form-item label="数据源">
-            <a-select
-              v-model:value="dataSource"
-              allow-clear
-              placeholder="全部"
-              style="width: 140px"
-              :options="[{ value: 'live', label: '实时视频' }]"
-            />
-          </a-form-item>
-          <a-form-item label="规则/名称/ID">
-            <a-input
-              v-model:value="keyword"
-              allow-clear
-              placeholder="搜索"
-              style="width: 200px"
-            />
-          </a-form-item>
-        </a-form>
-      </div>
-
-      <div class="table-card">
-        <a-table
-          :columns="columns"
-          :data-source="list"
-          :loading="loading"
-          row-key="id"
-          :pagination="false"
-          size="middle"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'status'">
-              <a-tag :color="record.status === '已处理' ? 'green' : 'orange'">{{ record.status }}</a-tag>
+      <section class="alarm-table">
+        <div class="table-wrap">
+          <div v-if="querying" class="query-overlay">
+            <div class="loading-dot" />
+            <div class="loading-text">正在查询中</div>
+          </div>
+          <a-table :columns="columns" :data-source="pagedList" row-key="id" :pagination="false" :loading="fetching">
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'status'">
+                <a-tag :color="record.status === '已处理' ? 'green' : 'orange'">{{ record.status }}</a-tag>
+              </template>
+              <template v-else-if="column.key === 'alarmStep'">
+                <a-tag color="red">{{ record.alarmStep || '人员避让' }}</a-tag>
+              </template>
+              <template v-else-if="column.key === 'action'">
+                <a-space>
+                  <a class="action-link">详情</a>
+                  <a class="action-link">上一条</a>
+                  <a class="action-link">下一条</a>
+                  <a class="action-link">处理</a>
+                </a-space>
+              </template>
             </template>
-            <template v-else-if="column.key === 'alarmStep'">
-              <a-tag color="red">{{ record.alarmStep || '人员避让' }}</a-tag>
-            </template>
-            <template v-else-if="column.key === 'action'">
-              <a-space><a>详情</a><a>上一条</a><a>下一条</a><a>处理</a></a-space>
-            </template>
-          </template>
-          <template #expandedRowRender>
-            <div class="expanded-detail">
-              <div class="evidence-tabs">
-                <a-tag color="blue">作业图片：上一张 / 下一张</a-tag>
-                <a-tag color="purple">事件视频：前后15秒</a-tag>
-                <a-tag color="green">实时监控</a-tag>
+            <template #expandedRowRender>
+              <div class="expanded-detail">
+                <div class="evidence-tabs">
+                  <a-tag color="blue">作业图片：上一张 / 下一张</a-tag>
+                  <a-tag color="purple">事件视频：前后15秒</a-tag>
+                  <a-tag color="green">实时监控</a-tag>
+                </div>
+                <a-table :data-source="processRows" row-key="step" size="small" :pagination="false">
+                  <a-table-column title="作业步骤" data-index="step" key="step" width="160" />
+                  <a-table-column title="执行状态" data-index="status" key="status" width="160" />
+                  <a-table-column title="执行时间" data-index="time" key="time" width="140" />
+                  <a-table-column title="证据" data-index="image" key="image" />
+                </a-table>
               </div>
-              <a-table :data-source="processRows" row-key="step" size="small" :pagination="false">
-                <a-table-column title="作业步骤" data-index="step" key="step" width="160" />
-                <a-table-column title="执行状态" data-index="status" key="status" width="160" />
-                <a-table-column title="执行时间" data-index="time" key="time" width="140" />
-                <a-table-column title="证据" data-index="image" key="image" />
-              </a-table>
-            </div>
-          </template>
-          <template #emptyText>
-            <a-empty description="暂无预警数据" />
-          </template>
-        </a-table>
-        <div class="pager">
-          <a-pagination
-            v-model:current="page"
-            v-model:page-size="pageSize"
-            :total="total"
-            show-size-changer
-            @change="load"
-          />
+            </template>
+            <template #emptyText>
+              <div class="empty-wrap">
+                <a-empty :description="hasActiveFilters && hasSearched ? '未找到相关数据' : '暂无数据'" />
+                <a-button v-if="hasActiveFilters && hasSearched" class="empty-clear" @click="onReset">重置筛选</a-button>
+              </div>
+            </template>
+          </a-table>
+
+          <div class="pager">
+            <span class="pager-total">共 {{ total }} 条数据</span>
+            <a-pagination
+              v-model:current="page"
+              v-model:page-size="pageSize"
+              :total="total"
+              show-size-changer
+              :page-size-options="['10', '20', '50', '100']"
+              size="small"
+              @change="onQuery"
+            />
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.biz-page {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
+.alarm-page {
+  padding: 0;
+  background: #fff;
+  min-height: 100%;
   overflow: auto;
-  background: $bg-white;
-  padding: 0 16px 16px;
 }
 
-.page-shell {
-  background: $bg-white;
-  padding: 0 0 16px;
+.alarm-shell {
+  background: #fff;
+  border-radius: 0;
+  padding: 0 24px 16px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.page-head {
+.alarm-shell :deep(.official-page-head) {
+  padding: 20px 0 16px;
+}
+
+.icon-btn {
+  color: #86909c;
+}
+
+.alarm-filter {
+  margin-top: 12px;
+}
+
+.filter-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid $divider;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
-.page-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: $text-primary;
+.filter-toggle {
+  border-radius: 6px;
+  border: 1px solid #e5e6eb;
+  color: #1f2329;
+  background: #fff;
 }
 
-.page-actions {
-  display: flex;
-  gap: 8px;
+.filter-toggle.active {
+  border-color: #1677ff;
+  color: #1677ff;
 }
 
-.detail-guide {
+.filter-count {
+  margin-left: 6px;
+  padding: 0 6px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 10px;
+  background: #e6f4ff;
+  color: #1677ff;
+  font-size: 12px;
+}
+
+.filter-panel {
+  margin-top: 10px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 12px 12px 10px;
+}
+
+.filter-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  padding: 16px 20px 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px 16px;
 }
 
-.detail-card {
-  padding: 12px;
-  border: 1px solid #e6eefc;
-  border-radius: 12px;
-  background: #fbfdff;
-
-  strong {
-    color: $text-primary;
-  }
-
-  p {
-    margin: 6px 0 0;
-    color: $text-secondary;
-    line-height: 1.6;
-  }
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
+
+.filter-label {
+  flex: 0 0 auto;
+  color: #4e5969;
+  font-size: 12px;
+}
+
+.filter-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-reset {
+  border-radius: 6px;
+}
+
+.btn-query {
+  border-radius: 6px;
+}
+
+.alarm-table {
+  margin-top: 12px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.table-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-wrap :deep(.ant-spin-nested-loading) {
+  flex: 1;
+  min-height: 0;
+}
+
+.table-wrap :deep(.ant-spin-container) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-wrap :deep(.ant-table) {
+  flex: 1;
+  min-height: 0;
+}
+
+.table-wrap :deep(.ant-table) {
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+}
+
+.table-wrap :deep(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  color: #1f2329;
+  font-weight: 500;
+}
+
+.action-link {
+  color: #1677ff;
+}
+
+.action-link:hover {
+  color: #4096ff;
+}
+
 .expanded-detail {
   display: grid;
   gap: 12px;
@@ -257,22 +441,109 @@ onMounted(load);
   gap: 8px;
 }
 
-.filter-card {
-  padding: 16px 20px 0;
+.query-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
 }
 
-.filter-form {
-  row-gap: 8px;
+.empty-wrap {
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.table-card {
-  padding: 16px 20px 0;
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1677ff;
+  animation: dot-pulse 1s infinite ease-in-out;
+}
+
+.loading-text {
+  margin-top: 10px;
+  color: #1677ff;
+  font-size: 12px;
+}
+
+@keyframes dot-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.empty-clear {
+  margin-top: 12px;
+  border-radius: 6px;
 }
 
 .pager {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  align-items: center;
+  gap: 14px;
+  padding-top: 14px;
+  color: #86909c;
+  font-size: 12px;
+}
+
+.pager :deep(.ant-pagination) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pager :deep(.ant-select-selector) {
+  height: 28px !important;
+  border-radius: 6px !important;
+}
+
+.pager :deep(.ant-pagination-item) {
+  min-width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.pager :deep(.ant-pagination-item-active) {
+  background: #f2f3f5;
+  border-color: #d9d9d9;
+}
+
+.pager :deep(.ant-pagination-item-active a) {
+  color: #1f2329;
+}
+
+.pager :deep(.ant-pagination-prev),
+.pager :deep(.ant-pagination-next) {
+  min-width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.pager :deep(.ant-pagination-prev button),
+.pager :deep(.ant-pagination-next button) {
+  border-radius: 6px;
 }
 </style>
 
