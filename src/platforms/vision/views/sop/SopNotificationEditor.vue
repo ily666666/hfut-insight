@@ -1886,9 +1886,24 @@ onMounted(() => {
 }
 
 .tag-rows {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.tag-rows::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: 6px;
+  width: 14px;
+  border-left: 2px solid #e5e6eb;
+  border-top: 2px solid #e5e6eb;
+  border-bottom: 2px solid #e5e6eb;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 .tag-row {
@@ -1911,37 +1926,12 @@ onMounted(() => {
 .tag-graph::before {
   content: '';
   position: absolute;
-  left: 8px;
-  top: -10px;
-  bottom: -10px;
-  width: 2px;
-  background: #e5e6eb;
-  border-radius: 2px;
-}
-
-.tag-graph::after {
-  content: '';
-  position: absolute;
-  left: 5px;
   top: 50%;
   transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: #1677ff;
-}
-
-.tag-graph.first::before {
-  top: 50%;
-}
-
-.tag-graph.last::before {
-  bottom: 50%;
-}
-
-.tag-graph.single::before {
-  top: 50%;
-  bottom: 50%;
+  left: 14px;
+  width: 12px;
+  height: 2px;
+  background: #e5e6eb;
 }
 
 .tag-row-remove {
@@ -1966,6 +1956,7 @@ onMounted(() => {
 
 .tag-add {
   margin-top: 10px;
+  margin-left: 28px;
   border: 0;
   background: transparent;
   color: #1677ff;

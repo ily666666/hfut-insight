@@ -37,6 +37,12 @@ export const visionPrimaryMenu: PrimaryMenuItem[] = [
     defaultRoute: '/vision/analysis/view-files',
   },
   {
+    key: 'skill-store',
+    title: '技能广场',
+    icon: 'mdi:animation-play-outline',
+    defaultRoute: '/vision/skill-store/list',
+  },
+  {
     key: 'asset',
     title: '资产管理',
     icon: 'mdi:folder-open-outline',
@@ -197,22 +203,10 @@ export const visionSecondaryMenu: Record<string, SecondaryMenuConfig> = {
         route: '/vision/analysis/plan',
       },
       {
-        key: 'analysis-tasks',
-        title: '分析任务',
-        icon: 'mdi:progress-clock',
-        route: '/vision/analysis/analysis-tasks',
-      },
-      {
-        key: 'events',
+        key: 'event-record',
         title: '事件记录',
-        icon: 'mdi:alert-circle-outline',
-        route: '/vision/analysis/events',
-      },
-      {
-        key: 'statistics',
-        title: '统计概览',
-        icon: 'mdi:chart-bar',
-        route: '/vision/analysis/statistics',
+        icon: 'mdi:format-list-bulleted',
+        route: '/vision/analysis/event/manage',
       },
       {
         key: 'app-notify',
