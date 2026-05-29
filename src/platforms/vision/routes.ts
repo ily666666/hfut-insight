@@ -360,6 +360,18 @@ export const visionRoutes: RouteRecordRaw[] = [
         component: () => import('@/platforms/vision/views/skill-store/SkillStoreList.vue'),
         meta: { title: '技能广场', platform: 'vision', primary: 'skill-store', hideSecondary: true },
       },
+      {
+        path: 'auth',
+        name: 'SkillStoreAuth',
+        component: () => import('@/platforms/vision/views/skill-store/SkillAuthManage.vue'),
+        meta: { title: '技能授权管理', platform: 'vision', primary: 'skill-store', hideSecondary: true },
+      },
+      {
+        path: 'detail/:id',
+        name: 'VisionSkillDetail',
+        component: () => import('@/platforms/vision/views/skill-store/SkillDetail.vue'),
+        meta: { title: '技能详情', platform: 'vision', primary: 'skill-store', hideSecondary: true },
+      },
     ],
   },
   {
