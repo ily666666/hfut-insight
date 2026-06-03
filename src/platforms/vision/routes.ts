@@ -394,6 +394,28 @@ export const visionRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'device/detail',
+        name: 'VisionAssetDeviceDetail',
+        component: () => import('@/platforms/vision/views/asset/DeviceDetail.vue'),
+        meta: { 
+          title: '设备详情', 
+          platform: 'vision', 
+          primary: 'asset',
+          secondary: 'device' 
+        },
+      },
+      {
+        path: 'abnormalDevice',
+        name: 'VisionAssetAbnormalDevice',
+        component: () => import('@/platforms/vision/views/asset/AbnormalDevice.vue'),
+        meta: { 
+          title: '异常设备监控', 
+          platform: 'vision', 
+          primary: 'asset',
+          secondary: 'device' 
+        },
+      },
+      {
         path: 'point',
         name: 'AssetPoint',
         component: () => import('@/platforms/vision/views/asset/PointManage.vue'),
@@ -402,6 +424,18 @@ export const visionRoutes: RouteRecordRaw[] = [
           secondary: 'point',
           pageActions: listPage,
           platform: 'vision',
+        },
+      },
+      {
+        path: 'abnormalPoint',
+        name: 'VisionAssetAbnormalPoint',
+        component: () => import('@/platforms/vision/views/asset/AbnormalPoint.vue'),
+        meta: { 
+          title: '异常点位监控', 
+          platform: 'vision', 
+          primary: 'asset',
+          secondary: 'point',
+          hideInMenu: true
         },
       },
       {
@@ -424,6 +458,39 @@ export const visionRoutes: RouteRecordRaw[] = [
           secondary: 'skills',
           pageActions: listPage,
           platform: 'vision',
+        },
+      },
+      {
+        path: 'skills/detail/:id',
+        name: 'AssetSkillDetail',
+        component: () => import('@/platforms/vision/views/asset/SkillDetail.vue'),
+        meta: {
+          title: '技能详情',
+          secondary: 'skills',
+          platform: 'vision',
+          hideInMenu: true,
+        },
+      },
+      {
+        path: 'skills/auth',
+        name: 'AssetSkillAuth',
+        component: () => import('@/platforms/vision/views/asset/SkillAuth.vue'),
+        meta: {
+          title: '技能授权管理',
+          secondary: 'skills',
+          platform: 'vision',
+          hideInMenu: true,
+        },
+      },
+      {
+        path: 'skills/dispatch/:id',
+        name: 'AssetSkillDispatch',
+        component: () => import('@/platforms/vision/views/asset/SkillDispatch.vue'),
+        meta: {
+          title: '下发技能',
+          secondary: 'skills',
+          platform: 'vision',
+          hideInMenu: true,
         },
       },
     ],

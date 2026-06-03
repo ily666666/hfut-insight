@@ -31,4 +31,7 @@ export interface AssetSkillCard {
   category: string;
   description: string;
   version: string;
+  hardware?: string;
+  isLargeModel?: boolean;
+  image?: string;
 }
