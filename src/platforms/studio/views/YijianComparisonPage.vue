@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Icon } from '@iconify/vue';
+
 import {
   yijianCoverageColors,
   yijianCoverageLabels,
@@ -20,21 +20,21 @@ const platformLabels: Record<YijianPlatform, string> = {
 const platformCards = [
   {
     title: '技能开发平台',
-    icon: 'mdi:creation-outline',
+    icon: 'i-mdi-creation-outline',
     description: '承载技能广场、场景模型、技能编排、模型训练、数据湖、工作空间、API 与离线部署。',
     route: '/studio/workspace/orchestrate',
     metrics: ['技能生产', '模型训练', '数据资产', 'API 调用'],
   },
   {
     title: '视觉应用平台',
-    icon: 'mdi:cctv',
+    icon: 'i-mdi-cctv',
     description: '承载设备接入、点位管理、视频监控、监测预警、SOP 合规分析和视图分析。',
     route: '/vision/asset/device',
     metrics: ['设备点位', '实时视频', '预警事件', 'SOP 闭环'],
   },
   {
     title: '共享治理能力',
-    icon: 'mdi:shield-account-outline',
+    icon: 'i-mdi-shield-account-outline',
     description: '复用用户、组织、角色、安全认证和多用户访问控制说明，避免双平台重复实现。',
     route: '/studio/system/user',
     metrics: ['用户组织', '角色权限', 'API Key', '访问控制'],
@@ -125,7 +125,7 @@ function priorityColor(priority: YijianPriority) {
     <section class="platform-grid">
       <article v-for="item in platformCards" :key="item.title" class="official-card platform-card">
         <div class="platform-head">
-          <Icon :icon="item.icon" />
+          <span :class="item.icon" />
           <div>
             <h2>{{ item.title }}</h2>
             <p>{{ item.description }}</p>

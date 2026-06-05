@@ -5,7 +5,7 @@ import { Handle, Position, VueFlow, useVueFlow } from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
 import { Controls } from '@vue-flow/controls';
 import { MiniMap } from '@vue-flow/minimap';
-import { Icon } from '@iconify/vue';
+
 import { message } from 'ant-design-vue';
 import '@vue-flow/core/dist/style.css';
 import '@vue-flow/core/dist/theme-default.css';
@@ -294,7 +294,7 @@ function confirmPublish() {
             @click="addNode(item.kind)"
           >
             <span class="palette-icon" :style="{ color: item.color, backgroundColor: `${item.color}14` }">
-              <Icon :icon="item.icon" />
+              <span :class="item.icon" />
             </span>
             <span>
               <strong>{{ item.title }}</strong>
@@ -339,7 +339,7 @@ function confirmPublish() {
                 <Handle type="target" :position="Position.Left" />
                 <div class="skill-node-head">
                   <span :style="{ color: nodeProps.data.color, backgroundColor: `${nodeProps.data.color}14` }">
-                    <Icon :icon="nodeProps.data.icon" />
+                    <span :class="nodeProps.data.icon" />
                   </span>
                   <div>
                     <strong>{{ nodeProps.data.title }}</strong>

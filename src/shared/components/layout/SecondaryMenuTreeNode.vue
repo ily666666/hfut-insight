@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { Icon } from '@iconify/vue';
 import type { SecondaryMenuItem } from '@/shared/navigation';
 import SecondaryMenuTreeNode from './SecondaryMenuTreeNode.vue';

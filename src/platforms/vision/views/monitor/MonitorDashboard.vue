@@ -21,7 +21,7 @@ const timeText = computed(() => {
 });
 
 const fullscreenIcon = computed(() =>
-  isFullscreen.value ? 'mdi:fullscreen-exit' : 'mdi:fullscreen',
+  isFullscreen.value ? 'i-mdi-fullscreen-exit' : 'i-mdi-fullscreen',
 );
 
 const fullscreenTitle = computed(() =>
@@ -133,10 +133,10 @@ onBeforeUnmount(() => {
 
       <div class="screen-actions">
         <button class="action-btn" type="button" title="设置数据来源和图表组件">
-          <Icon icon="mdi:cog-outline" />
+          <span class="i-mdi-cog-outline" />
         </button>
         <button class="action-btn" type="button" :title="fullscreenTitle" @click="toggleFullscreen">
-          <Icon :icon="fullscreenIcon" />
+          <span :class="fullscreenIcon" />
         </button>
       </div>
     </header>
@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
           <div class="event-preview">
             <div class="center-insight">
               <div class="insight-orbit">
-                <Icon icon="mdi:video-wireless-outline" />
+                <span class="i-mdi-video-wireless-outline" />
                 <span>云边协同识别中</span>
               </div>
               <div class="center-metrics">

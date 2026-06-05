@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { Icon } from '@iconify/vue';
+
 import { message } from 'ant-design-vue';
 import { useRoute } from 'vue-router';
 import type {
@@ -96,7 +96,7 @@ function runExperience() {
       </div>
       <div class="experience-result">
         <div class="result-canvas">
-          <Icon icon="mdi:image-search-outline" />
+          <span class="i-mdi-image-search-outline" />
           <span>人员越界 96%</span>
           <span>叉车运行 91%</span>
           <span>烟火风险 18%</span>
@@ -145,7 +145,7 @@ function runExperience() {
               <p class="card-subtitle">{{ card.subtitle }}</p>
             </div>
             <button class="card-enter" type="button" @click="openDetail(card)">
-              <Icon icon="mdi:arrow-top-right" />
+              <span class="i-mdi-arrow-top-right" />
             </button>
           </div>
 

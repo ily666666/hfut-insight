@@ -1,264 +1,530 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { message } from 'ant-design-vue';
-import { fetchSystemUsers } from '@/shared/api';
-import type { SystemUserRow } from '@/shared/types/system';
-import { SECURITY_AUTH_URL } from '@/shared/constants/external';
+import { SyncOutlined, SearchOutlined, InfoCircleFilled, LeftOutlined } from '@ant-design/icons-vue';
 
 const loading = ref(false);
-const detailOpen = ref(false);
-const editOpen = ref(false);
-const list = ref<SystemUserRow[]>([]);
-const total = ref(0);
+const detailMode = ref(false);
+const currentRecord = ref<any>(null);
+const list = ref<any[]>([
+  {
+    id: '1',
+    userName: '865278304a',
+    position: '-',
+    roleName: '租户管理员',
+    orgName: '865278304a',
+    description: '-',
+    createTime: '2026-04-23 09:13:51',
+  }
+]);
+const total = ref(1);
 const page = ref(1);
 const pageSize = ref(10);
 
-const userGuides = [
-  { title: '共享用户列表', desc: '视觉应用平台和技能开发平台共享同一租户用户列表及组织结构。' },
-  { title: '应用内查看编辑', desc: '可查看用户基本信息、权限信息，编辑所属组织、用户角色、职位和描述。' },
-  { title: '控制台生命周期', desc: '子用户创建、删除、密码修改等生命周期操作以慧眼智能云控制台为准。' },
+const filters = ref({
+  userName: '',
+  role: [] as string[],
+  org: undefined,
+});
+
+const roleOptions = [
+  { label: '租户管理员', value: 'tenant_admin' },
+  { label: '管理员', value: 'admin' },
+  { label: '普通用户', value: 'user' },
 ];
 
+const handleRoleChange = (values: string[]) => {
+  if (values.includes('all')) {
+    if (filters.value.role.length === roleOptions.length) {
+      // If all were selected and 'all' is clicked, deselect all
+      filters.value.role = [];
+    } else {
+      // Select all
+      filters.value.role = roleOptions.map(opt => opt.value);
+    }
+  } else {
+    filters.value.role = values.filter(v => v !== 'all');
+  }
+};
+
 const columns = [
-  { title: '登录名', dataIndex: 'loginName', key: 'loginName', width: 150 },
-  { title: '显示名', dataIndex: 'displayName', key: 'displayName', width: 130 },
-  { title: '组织', dataIndex: 'orgName', key: 'orgName', width: 150 },
-  { title: '职位', dataIndex: 'position', key: 'position', width: 130 },
-  { title: '角色', dataIndex: 'roleNames', key: 'roleNames', ellipsis: true },
-  { title: '权限信息', dataIndex: 'permissionSummary', key: 'permissionSummary', width: 220 },
-  { title: '状态', dataIndex: 'status', key: 'status', width: 100 },
-  { title: '操作', key: 'action', width: 190 },
+  { title: '用户名', dataIndex: 'userName', key: 'userName' },
+  { title: '职位', dataIndex: 'position', key: 'position' },
+  { title: '用户角色', dataIndex: 'roleName', key: 'roleName' },
+  { title: '所属组织', dataIndex: 'orgName', key: 'orgName' },
+  { title: '描述', dataIndex: 'description', key: 'description' },
+  { title: '创建时间', dataIndex: 'createTime', key: 'createTime', sorter: true },
+  { title: '操作', key: 'action', width: 120 },
 ];
 
 async function load() {
   loading.value = true;
   try {
-    const res = await fetchSystemUsers({ page: page.value, pageSize: pageSize.value });
-    list.value = res.list;
-    total.value = res.total;
-  } finally {
+    // Simulate loading
+    setTimeout(() => {
+      loading.value = false;
+    }, 500);
+  } catch (e) {
     loading.value = false;
   }
 }
 
 function openConsole() {
-  window.open(SECURITY_AUTH_URL, '_blank');
+  window.open('https://console.bce.baidu.com/iam/#/account/user/list', '_blank');
 }
 
-function onDisable() {
-  message.info('用户禁用（仿真）');
+function viewDetail(record: any) {
+  currentRecord.value = record;
+  detailMode.value = true;
+}
+
+function backToList() {
+  detailMode.value = false;
+  currentRecord.value = null;
 }
 
 onMounted(load);
 </script>
 
 <template>
-  <div class="biz-page">
-    <div class="page-shell">
-      <a-alert
-        class="top-alert"
-        type="info"
-        show-icon
-        message="视觉应用平台与技能开发平台共享用户列表和组织结构"
-        description="本页承载应用内用户查看、角色与组织编辑入口；用户创建、密码修改、删除子用户等生命周期操作请前往控制台。"
-      >
-        <template #action>
-          <a-button size="small" type="primary" @click="openConsole">多用户访问控制</a-button>
-        </template>
-      </a-alert>
-
-      <header class="page-head">
-        <div>
-          <h1 class="page-title">用户</h1>
-          <p class="page-desc">查看租户下所有用户、基本信息、组织角色和权限信息。</p>
+  <div class="user-manage-page">
+    <template v-if="!detailMode">
+      <div class="page-header">
+        <h1 class="page-title">用户</h1>
+        
+        <div class="info-alert">
+          <InfoCircleFilled class="info-icon" />
+          <span>更多用户管理功能请前往百度智能云控制台操作</span>
+          <a class="info-link" @click="openConsole">立即前往</a>
         </div>
-        <a-space>
-          <a-button @click="load">刷新</a-button>
-          <a-button type="primary" @click="openConsole">去控制台创建用户</a-button>
-        </a-space>
-      </header>
-
-      <section class="guide-grid">
-        <article v-for="item in userGuides" :key="item.title" class="guide-card">
-          <strong>{{ item.title }}</strong>
-          <p>{{ item.desc }}</p>
-        </article>
-      </section>
-
-      <div class="filter-strip">
-        <a-space wrap>
-          <a-input allow-clear placeholder="登录名 / 显示名" style="width: 200px" />
-          <a-select
-            allow-clear
-            placeholder="组织"
-            style="width: 160px"
-            :options="[
-              { value: 'root', label: '123456789' },
-              { value: 'safety', label: '安全生产部' },
-              { value: 'algorithm', label: '算法研发组' },
-            ]"
-          />
-          <a-select
-            allow-clear
-            placeholder="用户状态"
-            style="width: 130px"
-            :options="[
-              { value: 'enabled', label: '启用' },
-              { value: 'disabled', label: '禁用' },
-            ]"
-          />
-          <a-button type="primary" @click="load">查询</a-button>
-          <a-button>重置</a-button>
-        </a-space>
       </div>
 
-      <div class="table-card">
+      <div class="content-container">
+        <div class="filter-strip">
+          <div class="filter-left">
+            <a-input
+              v-model:value="filters.userName"
+              placeholder="请输入用户名搜索"
+              class="filter-input"
+            >
+              <template #suffix>
+                <SearchOutlined style="color: #bfbfbf" />
+              </template>
+            </a-input>
+            
+            <a-select
+              v-model:value="filters.role"
+              mode="multiple"
+              placeholder="全部用户角色"
+              class="filter-select custom-multi-select"
+              :max-tag-count="1"
+              @change="handleRoleChange"
+            >
+              <a-select-option value="all">
+                <a-checkbox :checked="filters.role.length === roleOptions.length" :indeterminate="filters.role.length > 0 && filters.role.length < roleOptions.length">
+                  全选
+                </a-checkbox>
+              </a-select-option>
+              <a-select-option v-for="opt in roleOptions" :key="opt.value" :value="opt.value">
+                <a-checkbox :checked="filters.role.includes(opt.value)">
+                  {{ opt.label }}
+                </a-checkbox>
+              </a-select-option>
+            </a-select>
+            
+            <a-select
+              v-model:value="filters.org"
+              placeholder="全部组织名称"
+              class="filter-select"
+              :options="[{ label: '865278304a', value: '865278304a' }]"
+            />
+          </div>
+          <div class="filter-right">
+            <a-button shape="circle" class="refresh-btn" @click="load">
+              <template #icon><SyncOutlined /></template>
+            </a-button>
+          </div>
+        </div>
+
         <a-table
           :columns="columns"
           :data-source="list"
           :loading="loading"
           row-key="id"
           :pagination="false"
-          size="middle"
+          class="custom-table"
         >
           <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'roleNames'">
-              <a-tag v-for="role in record.roleNames.split(',')" :key="role.trim()" color="blue">{{ role.trim() }}</a-tag>
-            </template>
-            <template v-else-if="column.key === 'permissionSummary'">
-              <span class="permission-text">{{ record.permissionSummary }}</span>
-            </template>
-            <template v-else-if="column.key === 'status'">
-              <a-tag :color="record.status === '启用' ? 'green' : 'orange'">{{ record.status }}</a-tag>
+            <template v-if="column.key === 'userName'">
+              <a class="link-text" @click="viewDetail(record)">{{ record.userName }}</a>
             </template>
             <template v-else-if="column.key === 'action'">
-              <a-space><a @click="detailOpen = true">查看</a><a @click="editOpen = true">编辑</a><a @click="onDisable">禁用</a></a-space>
+              <a-space size="middle">
+                <a class="link-text" @click="viewDetail(record)">查看</a>
+                <a-tooltip v-if="record.roleName === '租户管理员'" title="不支持操作租户管理员" placement="topRight" :overlayStyle="{ fontSize: '12px' }">
+                  <a class="link-text-disabled">编辑</a>
+                </a-tooltip>
+                <a v-else class="link-text">编辑</a>
+              </a-space>
             </template>
           </template>
-          <template #emptyText>
-            <a-empty description="暂无用户数据" />
-          </template>
         </a-table>
-        <div class="pager">
+        
+        <div class="pagination-wrapper">
+          <div class="total-text">共 {{ total }} 条数据</div>
           <a-pagination
             v-model:current="page"
             v-model:page-size="pageSize"
             :total="total"
             show-size-changer
+            size="small"
             @change="load"
           />
         </div>
       </div>
-    </div>
+    </template>
 
-    <a-drawer v-model:open="detailOpen" title="用户详情" width="640">
-      <a-descriptions bordered :column="1" size="small">
-        <a-descriptions-item label="基本信息">登录名、显示名、职位、描述、状态。</a-descriptions-item>
-        <a-descriptions-item label="权限信息">展示所属组织、用户角色、功能权限和数据权限摘要。</a-descriptions-item>
-        <a-descriptions-item label="管理说明">创建、删除、密码修改等请前往慧眼智能云控制台。</a-descriptions-item>
-      </a-descriptions>
-    </a-drawer>
+    <template v-else>
+      <div class="page-header detail-header">
+        <div class="detail-title-wrapper">
+          <LeftOutlined class="back-icon" @click="backToList" />
+          <h1 class="page-title detail-title">用户详情 {{ currentRecord?.userName }}</h1>
+        </div>
+      </div>
 
-    <a-drawer v-model:open="editOpen" title="编辑用户" width="640">
-      <a-form layout="vertical">
-        <a-form-item label="所属组织"><a-tree-select placeholder="请选择组织" /></a-form-item>
-        <a-form-item label="用户角色"><a-select mode="multiple" placeholder="请选择角色" :options="[{ label: '视觉应用管理员', value: 'vision' }, { label: '告警处理员', value: 'alarm' }, { label: '技能开发者', value: 'studio' }]" /></a-form-item>
-        <a-form-item label="职位"><a-input placeholder="请输入职位" /></a-form-item>
-        <a-form-item label="描述"><a-textarea :rows="3" placeholder="请输入用户描述" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-space><a-button @click="editOpen = false">取消</a-button><a-button type="primary" @click="editOpen = false">保存</a-button></a-space>
-      </template>
-    </a-drawer>
+      <div class="content-container detail-content">
+        <div class="detail-section">
+          <div class="section-title">
+            基本信息 
+            <a-tooltip v-if="currentRecord?.roleName === '租户管理员'" title="不支持操作租户管理员" placement="top" :overlayStyle="{ fontSize: '12px' }">
+              <span class="edit-icon disabled i-mdi-square-edit-outline"></span>
+            </a-tooltip>
+            <span v-else class="edit-icon i-mdi-square-edit-outline"></span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">用户名称</span>
+              <span class="info-value">{{ currentRecord?.userName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">职位</span>
+              <span class="info-value">{{ currentRecord?.position || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">所属组织</span>
+              <span class="info-value">{{ currentRecord?.orgName || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">描述</span>
+              <span class="info-value">{{ currentRecord?.description || '-' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <a-divider style="margin: 24px 0" />
+
+        <div class="detail-section">
+          <div class="section-title">
+            权限信息 
+            <a-tooltip v-if="currentRecord?.roleName === '租户管理员'" title="不支持操作租户管理员" placement="top" :overlayStyle="{ fontSize: '12px' }">
+              <span class="edit-icon disabled i-mdi-square-edit-outline"></span>
+            </a-tooltip>
+            <span v-else class="edit-icon i-mdi-square-edit-outline"></span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">用户角色</span>
+              <span class="info-value">{{ currentRecord?.roleName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">数据权限</span>
+              <span class="info-value">全部数据</span>
+            </div>
+          </div>
+          
+          <div class="permission-tree-container">
+            <div class="permission-tree-label">功能权限</div>
+            <div class="permission-tree-content">
+              <div class="permission-count">共176个功能权限</div>
+              <div class="tree-box">
+                <a-tree
+                  :tree-data="[
+                    {
+                      title: '视觉应用平台',
+                      key: '0-0',
+                      children: [
+                        {
+                          title: '系统管理',
+                          key: '0-0-0',
+                          children: [
+                            { title: '用户权限', key: '0-0-0-0' },
+                            { title: '安全认证', key: '0-0-0-1' }
+                          ]
+                        },
+                        {
+                          title: '资产管理',
+                          key: '0-0-1',
+                          children: [
+                            { title: '设备', key: '0-0-1-0' },
+                            { title: '技能', key: '0-0-1-1' },
+                            { title: '国标平台', key: '0-0-1-2' }
+                          ]
+                        },
+                        {
+                          title: '视图分析应用',
+                          key: '0-0-2',
+                          children: [
+                            { title: '视图文件', key: '0-0-2-0' },
+                            { title: '分析计划', key: '0-0-2-1' },
+                            { title: '事件记录', key: '0-0-2-2' },
+                            { title: '应用通知', key: '0-0-2-3' }
+                          ]
+                        },
+                        {
+                          title: '监测预警应用',
+                          key: '0-0-3',
+                          children: [
+                            { title: '实时监控', key: '0-0-3-0' },
+                            { title: '预警管理', key: '0-0-3-1' }
+                          ]
+                        }
+                      ]
+                    }
+                  ]"
+                  default-expand-all
+                  :selectable="false"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
-<style lang="scss" scoped>
-.biz-page {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  overflow: auto;
-  background: $bg-white;
-  padding: 0 16px 16px;
-}
-
-.page-shell {
-  background: $bg-white;
-  padding-bottom: 16px;
-}
-
-.top-alert {
-  margin: 16px 20px 0;
-}
-
-.page-head {
+<style scoped>
+.user-manage-page {
+  background-color: #fff;
+  min-height: 100%;
+  width: 100%;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px 8px;
+  flex-direction: column;
+}
+
+.page-header {
+  padding: 24px 24px 16px 24px;
 }
 
 .page-title {
-  margin: 0;
-  font-size: 18px;
+  margin: 0 0 16px 0;
+  font-size: 20px;
   font-weight: 600;
+  color: #1d2129;
 }
 
-.page-desc {
-  margin: 6px 0 0;
-  color: $text-secondary;
+.info-alert {
+  display: flex;
+  align-items: center;
+  background-color: #f2f6ff;
+  border-radius: 4px;
+  padding: 8px 16px;
+  color: #4e5969;
+  font-size: 14px;
 }
 
-.guide-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  padding: 8px 20px 0;
+.info-icon {
+  color: #1677ff;
+  margin-right: 8px;
 }
 
-.guide-card {
-  padding: 14px;
-  border: 1px solid $divider;
-  border-radius: 12px;
-  background: #fbfdff;
+.info-link {
+  color: #1677ff;
+  margin-left: 8px;
+  cursor: pointer;
+}
 
-  strong {
-    color: $text-primary;
-  }
-
-  p {
-    margin: 6px 0 0;
-    color: $text-secondary;
-    line-height: 1.6;
-  }
+.content-container {
+  background-color: #fff;
+  padding: 0 24px 24px 24px;
+  flex: 1;
 }
 
 .filter-strip {
-  padding: 16px 20px;
-  border-bottom: 1px solid $divider;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
-.table-card {
-  padding: 16px 20px 0;
+.filter-left {
+  display: flex;
+  gap: 16px;
 }
 
-.permission-text {
-  color: $text-secondary;
+.filter-input {
+  width: 280px;
 }
 
-.pager {
+.filter-select {
+  width: 200px;
+}
+
+.custom-multi-select :deep(.ant-select-selection-item) {
+  background: transparent;
+  border: none;
+  padding-left: 0;
+}
+
+.custom-multi-select :deep(.ant-select-item-option-content) {
+  display: flex;
+  align-items: center;
+}
+
+.custom-multi-select :deep(.ant-checkbox-wrapper) {
+  width: 100%;
+}
+
+.refresh-btn {
+  color: #86909c;
+  border-color: #e5e6eb;
+}
+
+.custom-table :deep(.ant-table-thead > tr > th) {
+  background: #f7f8fa;
+  color: #4e5969;
+  font-weight: 500;
+  padding: 12px 16px;
+}
+
+.custom-table :deep(.ant-table-tbody > tr > td) {
+  padding: 16px;
+  color: #1d2129;
+}
+
+.link-text {
+  color: #1677ff;
+  cursor: pointer;
+}
+
+.link-text-disabled {
+  color: #c9cdd4;
+  cursor: not-allowed;
+}
+
+.pagination-wrapper {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   margin-top: 16px;
+  gap: 16px;
 }
 
-@media (max-width: 960px) {
-  .page-head,
-  .guide-grid {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-  }
+.total-text {
+  color: #4e5969;
+  font-size: 14px;
+}
+
+/* Detail View Styles */
+.detail-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e6eb;
+}
+
+.detail-title-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.back-icon {
+  font-size: 18px;
+  color: #1d2129;
+  cursor: pointer;
+  margin-right: 12px;
+}
+
+.detail-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.detail-content {
+  padding-top: 24px;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.edit-icon {
+  margin-left: 8px;
+  color: #1677ff;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.edit-icon.disabled {
+  color: #c9cdd4;
+  cursor: not-allowed;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-item {
+  display: flex;
+  font-size: 14px;
+}
+
+.info-label {
+  color: #86909c;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.info-value {
+  color: #1d2129;
+}
+
+.permission-tree-container {
+  display: flex;
+  font-size: 14px;
+}
+
+.permission-tree-label {
+  color: #86909c;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.permission-tree-content {
+  flex: 1;
+}
+
+.permission-count {
+  color: #1d2129;
+  margin-bottom: 12px;
+}
+
+.tree-box {
+  background-color: #f7f8fa;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e5e6eb;
+  max-height: 400px;
+  overflow-y: auto;
 }
 </style>
