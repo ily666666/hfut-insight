@@ -71,81 +71,6 @@ const statusOptions = [
   { label: '已停用', value: 'stopped' },
 ];
 
-export const QUICK_START_PAGE: SkillTableConfig = {
-  description: '围绕识界文档中的四条快速开始路径，串联技能创建、模板迭代、技能广场和场景模型体验。',
-  toolbar: [
-    { label: '查看能力对标' },
-    { label: '启动快速向导', type: 'primary', primaryFlow: true },
-  ],
-  stats: [
-    { label: '引导流程', value: '04' },
-    { label: '覆盖菜单', value: '04' },
-    { label: '可复用入口', value: '11' },
-  ],
-  flowSteps: ['创建技能基础信息', '生成待发布技能卡片', '点击卡片进入编排画布', '拖拽并连接节点', '调试评测', '发布 API/视觉应用'],
-  currentStep: 2,
-  summaryCards: [
-    {
-      title: '创建视觉 AI 技能',
-      value: '4 步',
-      description: '填写名称、描述、标签和配图后生成待发布技能卡片，点击卡片进入画布编排节点并发布。',
-    },
-    {
-      title: '模板迭代场景模型',
-      value: '5 步',
-      description: '从数据集准备、标注质检、模板训练、评测对比到模型入库，形成专属场景模型版本。',
-    },
-    {
-      title: '摄像头智能化',
-      value: '5 步',
-      description: '技能广场获取技能后，绑定点位、配置运行计划并进入预警处理。',
-    },
-  ],
-  columns: [
-    { title: '快速开始', dataIndex: 'name', width: 240 },
-    { title: '对标菜单', dataIndex: 'doc', width: 260 },
-    { title: '关键步骤', dataIndex: 'steps', width: 320 },
-    { title: '承载模块', dataIndex: 'module', width: 220 },
-    { title: '覆盖状态', dataIndex: 'status', width: 120 },
-    { title: '操作', key: 'action', width: 180 },
-  ],
-  rows: [
-    {
-      key: '1',
-      name: '三分钟创建视觉 AI 技能',
-      doc: '技能开发 / 快速开始 / 三分钟创建一个视觉AI技能',
-      steps: '进入技能编排页 → 点击创建技能 → 填写名称/描述/标签/配图 → 点击技能卡片进入画布 → 发布 API/视觉应用',
-      module: '技能编排 / 技能仓库 / API管理',
-      status: '运行中',
-    },
-    {
-      key: '2',
-      name: '模板迭代专属场景模型',
-      doc: '技能开发 / 快速开始 / 基于模板快速迭代专属场景模型',
-      steps: '数据集 → 标注质检 → 训练模板 → 训练任务 → 模型入库',
-      module: '数据集 / 训练任务 / 模型仓库',
-      status: '运行中',
-    },
-    {
-      key: '3',
-      name: '从技能广场获取技能',
-      doc: '技能开发 / 快速开始 / 技能广场',
-      steps: '筛选技能 → 查看版本 → 添加工作空间 → 发布视觉应用',
-      module: '技能广场 / 技能仓库',
-      status: '运行中',
-    },
-    {
-      key: '4',
-      name: '场景模型体验与复用',
-      doc: '技能开发 / 快速开始 / 场景模型',
-      steps: '选择场景 → 输入 Prompt → 上传样例 → 生成推荐技能',
-      module: '场景模型 / 训练模板',
-      status: '运行中',
-    },
-  ],
-};
-
-
 export const SKILL_CATALOG_PAGE: SkillCatalogConfig = {
   heroTitle: '技能广场',
   heroSubtitle:
@@ -1110,3 +1035,26 @@ export const SPACE_PAGE: SkillTableConfig = {
     },
   ],
 };
+
+export const EXPLORE_PAGES = [
+  {
+    key: 'explore',
+    icon: 'i-mdi-compass-outline',
+    label: '探索',
+    children: [
+      {
+        key: 'skills',
+        path: '/studio/explore/skills',
+        icon: 'i-mdi-apps',
+        label: '技能广场'
+      },
+      {
+        key: 'scenes',
+        path: '/studio/explore/scenes',
+        icon: 'i-mdi-shape-outline',
+        label: '场景模型'
+      }
+    ]
+  }
+];
+

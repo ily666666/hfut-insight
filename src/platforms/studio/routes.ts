@@ -10,7 +10,6 @@ import {
   OFFLINE_DEPLOY_PAGE,
   OPERATOR_PAGE,
   ORCHESTRATE_PAGE,
-  QUICK_START_PAGE,
   REPOSITORY_PAGE,
   SCENE_MODEL_PAGE,
   SKILL_CATALOG_PAGE,
@@ -45,54 +44,56 @@ export const studioRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: 'explore',
-        redirect: studioPath('explore', 'skills'),
-      },
-      {
-        path: 'explore/comparison',
-        name: 'YijianComparison',
-        component: () => import('@/platforms/studio/views/YijianComparisonPage.vue'),
-        meta: {
-          platform: 'studio',
-          primary: 'explore',
-          secondary: 'comparison',
-          title: '能力对标',
-        },
-      },
-      {
-        path: 'explore/quick-start',
-        name: 'SkillExploreQuickStart',
-        component: () => import('@/platforms/studio/views/SkillTablePage.vue'),
-        meta: {
-          platform: 'studio',
-          primary: 'explore',
-          secondary: 'quick-start',
-          title: '快速开始',
-          tableConfig: QUICK_START_PAGE,
-        },
-      },
-      {
-        path: 'explore/skills',
-        name: 'SkillExploreSquare',
-        component: () => import('@/platforms/studio/views/SkillCatalogPage.vue'),
-        meta: {
-          platform: 'studio',
-          primary: 'explore',
-          secondary: 'skills',
-          title: '技能广场',
-          catalogConfig: SKILL_CATALOG_PAGE,
-        },
-      },
-      {
-        path: 'explore/scenes',
-        name: 'SkillExploreScenes',
-        component: () => import('@/platforms/studio/views/SkillCatalogPage.vue'),
-        meta: {
-          platform: 'studio',
-          primary: 'explore',
-          secondary: 'scenes',
-          title: '场景模型',
-          catalogConfig: SCENE_MODEL_PAGE,
-        },
+        name: 'StudioExplore',
+        redirect: '/studio/explore/skills',
+        children: [
+          {
+            path: 'skills',
+            name: 'SkillExploreSquare',
+            component: () => import('@/platforms/studio/views/SkillExploreSquare.vue'),
+            meta: {
+              platform: 'studio',
+              primary: 'explore',
+              secondary: 'skills',
+              title: '技能广场',
+            },
+          },
+          {
+            path: 'skills/detail/:id',
+            name: 'StudioSkillDetail',
+            component: () => import('@/platforms/vision/views/skill-store/SkillDetail.vue'),
+            meta: {
+              platform: 'studio',
+              primary: 'explore',
+              secondary: 'skills',
+              title: '技能详情',
+              hideInMenu: true,
+            },
+          },
+          {
+            path: 'scenes',
+            name: 'SkillExploreScenes',
+            component: () => import('@/platforms/studio/views/SkillCatalogPage.vue'),
+            meta: {
+              platform: 'studio',
+              primary: 'explore',
+              secondary: 'scenes',
+              title: '场景模型',
+            },
+          },
+          {
+            path: 'scenes/detail/:id',
+            name: 'StudioSceneDetail',
+            component: () => import('@/platforms/studio/views/ModelDetail.vue'),
+            meta: {
+              platform: 'studio',
+              primary: 'explore',
+              secondary: 'scenes',
+              title: '模型详情',
+              hideInMenu: true,
+            },
+          }
+        ]
       },
       {
         path: 'workspace',

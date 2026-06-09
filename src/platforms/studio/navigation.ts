@@ -38,18 +38,6 @@ export const studioSecondaryMenu: Record<string, SecondaryMenuConfig> = {
     footerText,
     items: [
       {
-        key: 'comparison',
-        title: '能力对标',
-        icon: 'mdi:map-search-outline',
-        route: '/studio/explore/comparison',
-      },
-      {
-        key: 'quick-start',
-        title: '快速开始',
-        icon: 'mdi:rocket-launch-outline',
-        route: '/studio/explore/quick-start',
-      },
-      {
         key: 'skills',
         title: '技能广场',
         icon: 'mdi:view-grid-outline',

@@ -1,436 +1,670 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { ref, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { message } from 'ant-design-vue';
-import { useRoute } from 'vue-router';
-import type {
-  SkillCatalogCard,
-  SkillCatalogConfig,
-} from '@/platforms/studio/constants/skill-pages';
+const router = useRouter();
 
-const route = useRoute();
-const config = computed(() => route.meta.catalogConfig as SkillCatalogConfig);
-const selectedCard = ref<SkillCatalogCard | null>(null);
-const promptText = ref('识别画面中的人员、车辆、烟火和越界风险，并输出结构化告警原因。');
-const threshold = ref(78);
-const experienceLogs = ref<string[]>([
-  '已加载官方体验模型，支持图片上传、Prompt 调优和阈值调整。',
-]);
+const categories = [
+  '全部', '视觉模型', '目标检测', '图像单标签分类', '图像多属性分类', 
+  '语义分割', '实例分割', '多模态大模型', '图片问答'
+];
+const hardwareOptions = [
+  '全部', '英伟达A10', '英伟达A100', '英伟达A40', '华为Ascend910B', '华为Atlas300I', '华为Atlas310P', 
+  '比特大陆BM1684', '比特大陆BM1684X', '比特大陆BM1688', '昆仑芯K200', '天数智芯MRV100', 
+  '天数智芯MRV50', '昆仑芯P800', '昆仑芯R200', '英伟达RTX4090', '英伟达T4', '英伟达V100'
+];
 
-watch(
-  () => route.fullPath,
-  () => {
-    selectedCard.value = null;
-    experienceLogs.value = config.value.experience
-      ? ['已加载官方体验模型，支持图片上传、Prompt 调优和阈值调整。']
-      : [];
+const searchForm = reactive({
+  keyword: '',
+  category: [] as string[],
+  hardware: [] as string[],
+});
+
+const showFilter = ref(true);
+
+const filterCount = computed(() => {
+  return searchForm.category.length + searchForm.hardware.length;
+});
+
+function toggleFilter() {
+  showFilter.value = !showFilter.value;
+}
+
+function clearFilters() {
+  searchForm.category = [];
+  searchForm.hardware = [];
+  searchForm.keyword = '';
+}
+
+const mockModels = [
+  {
+    id: 'c-opaomateyuyifengemoxing-T4-moxb',
+    title: '工厂注塑料产品缺陷 模型-T4-模型包',
+    category: '视觉/模型包/语义分割',
+    hardware: '英伟达T4',
+    date: '2026-03-31 22:43:49',
+    icon: 'i-mdi-hexagon-multiple-outline'
   },
-  { immediate: true },
-);
+  {
+    id: 'c-nxizucheqitiemajiance-R200-moxb',
+    title: '阳车器铁马检测-R200-模型包',
+    category: '视觉/模型包/目标检测',
+    hardware: '昆仑芯R200',
+    date: '2026-03-31 22:43:49',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  },
+  {
+    id: 'fengmenjiance-R200-moxingbao',
+    title: '风门检测模型-R200-模型包',
+    category: '视觉/模型包/目标检测',
+    hardware: '昆仑芯R200',
+    date: '2026-03-31 22:43:48',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  },
+  {
+    id: 'c-jiance-wugenzong-R200-moxingbao',
+    title: '贴附检测-无跟踪-R200-模型包',
+    category: '视觉/模型包/目标检测',
+    hardware: '昆仑芯R200',
+    date: '2026-03-31 22:43:47',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  },
+  {
+    id: 'ks-tsj-cls-R200-ensemble',
+    title: '矿山提升机运动-R200',
+    category: '视觉/模型包/图像单标...',
+    hardware: '昆仑芯R200',
+    date: '2026-03-31 22:42:19',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  },
+  {
+    id: 'ensemble',
+    title: '其他场景实例分割_抠图切图_缺陷识别-R200-模型包',
+    category: '视觉/模型包/实例分割',
+    hardware: '昆仑芯R200',
+    date: '2026-03-31 22:42:19',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  },
+  {
+    id: 'zsh_falan_mismatched-R200-moxingb',
+    title: '法兰不配对识别-R200-模型包',
+    category: '视觉/模型包/目标检测',
+    hardware: '昆仑芯R200',
+    date: '2026-03-31 22:42:19',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  },
+  {
+    id: 'zsh_falan_unprotected-R200-moxb',
+    title: '法兰未保护识别-R200-模型包',
+    category: '视觉/模型包/目标检测',
+    hardware: '昆仑芯R200',
+    date: '2026-03-31 22:42:19',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  }
+];
 
-function openDetail(card: SkillCatalogCard) {
-  selectedCard.value = card;
+const filteredModels = computed(() => {
+  let result = mockModels.filter(model => {
+    if (searchForm.keyword && !model.title.includes(searchForm.keyword) && !model.id.includes(searchForm.keyword)) {
+      return false;
+    }
+    if (searchForm.category.length > 0) {
+      // 简单模拟分类匹配
+      const match = searchForm.category.some(cat => model.category.includes(cat) || (cat === '目标检测' && model.category.includes('目标检测')));
+      if (!match) return false;
+    }
+    if (searchForm.hardware.length > 0) {
+      const match = searchForm.hardware.some(hw => model.hardware.includes(hw));
+      if (!match) return false;
+    }
+    return true;
+  });
+  return result;
+});
+
+function toggleCategory(cat: string) {
+  if (cat === '全部') {
+    searchForm.category = [];
+    return;
+  }
+  const idx = searchForm.category.indexOf(cat);
+  if (idx > -1) {
+    searchForm.category.splice(idx, 1);
+  } else {
+    searchForm.category.push(cat);
+  }
 }
 
-function useTemplate(card: SkillCatalogCard) {
-  selectedCard.value = card;
-  message.success(`${card.title} 已加入默认工作空间，可继续编排、评测和发布。`);
+function toggleHardware(hw: string) {
+  if (hw === '全部') {
+    searchForm.hardware = [];
+    return;
+  }
+  const idx = searchForm.hardware.indexOf(hw);
+  if (idx > -1) {
+    searchForm.hardware.splice(idx, 1);
+  } else {
+    searchForm.hardware.push(hw);
+  }
 }
 
-function runExperience() {
-  experienceLogs.value.unshift(
-    `体验任务已完成：阈值 ${threshold.value}%，Prompt「${promptText.value.slice(0, 26)}...」`,
-  );
-  message.success('场景模型体验完成，已生成识别结果和推荐技能。');
+function goToDetail(id: string) {
+  router.push({ path: `/studio/explore/scenes/detail/${id}` });
 }
 </script>
 
 <template>
-  <div class="official-page skill-catalog-page">
-    <section class="official-card hero-card">
-      <div class="hero-copy">
-        <h1 class="hero-title">{{ config.heroTitle }}</h1>
-        <p class="hero-subtitle">{{ config.heroSubtitle }}</p>
-      </div>
-      <div class="hero-actions">
-        <a-button>使用指引</a-button>
-        <a-button>导入技能包</a-button>
-        <a-button type="primary">进入工作空间</a-button>
-      </div>
-    </section>
+  <div class="official-page scene-model-page">
+    <div class="official-page-head" style="position: sticky; top: 0; z-index: 10;">
+      <h1 class="official-page-title">场景模型</h1>
+    </div>
 
-    <section class="stats-grid">
-      <article v-for="item in config.stats" :key="item.label" class="official-metric">
-        <div class="metric-dot" :style="{ background: item.accent || '#2468f2' }" />
-        <div>
-          <div class="official-metric-value">{{ item.value }}</div>
-          <div class="official-metric-label">{{ item.label }}</div>
-        </div>
-      </article>
-    </section>
+    <div class="official-card page-card" style="padding: 24px;">
+      <!-- Filters -->
+      <div class="filter-section">
+        <div class="search-row">
+          <a-button-group class="filter-btn-group" style="margin-right: 16px;">
+            <a-button 
+              @click="toggleFilter"
+              class="filter-toggle-btn"
+              :class="{ 'is-active': showFilter }"
+            >
+              <span :class="showFilter ? 'i-mdi-menu-down' : 'i-mdi-menu-right'" style="margin-right: 4px; font-size: 16px; margin-left: -4px; color: #1d2129;"></span>
+              <span style="color: #1d2129;">模型筛选</span>
+              <span v-if="filterCount > 0" class="filter-badge">{{ filterCount }}</span>
+            </a-button>
+            <a-tooltip title="清空所有筛选项">
+              <a-button 
+                class="clear-filter-btn" 
+                @click="clearFilters"
+                :class="{ 'is-active': showFilter }"
+              >
+                <span class="i-mdi-broom" style="font-size: 16px; color: #1677ff;"></span>
+              </a-button>
+            </a-tooltip>
+          </a-button-group>
 
-    <section v-if="config.experience" class="official-card experience-card">
-      <div class="experience-left">
-        <div class="official-page-head compact-head">
-          <div>
-            <h2 class="section-title">{{ config.experience.title }}</h2>
-            <p class="section-desc">{{ config.experience.description }}</p>
-          </div>
-          <a-tag color="blue">多模态体验</a-tag>
+          <a-input
+            v-model:value="searchForm.keyword"
+            placeholder="请输入模型名称或ID搜索"
+            style="width: 320px;"
+            allow-clear
+          >
+            <template #prefix>
+              <span class="i-mdi-magnify" style="color: #86909c; font-size: 16px;"></span>
+            </template>
+          </a-input>
         </div>
-        <a-textarea
-          v-model:value="promptText"
-          :rows="4"
-          placeholder="请输入识别目标、告警条件或输出格式"
-        />
-        <div class="experience-controls">
-          <span>置信度阈值</span>
-          <a-slider v-model:value="threshold" class="threshold-slider" :min="50" :max="99" />
-          <span>{{ threshold }}%</span>
-        </div>
-        <a-space wrap>
-          <a-button>上传图片</a-button>
-          <a-button>选择样例</a-button>
-          <a-button type="primary" @click="runExperience">立即体验</a-button>
-        </a-space>
-      </div>
-      <div class="experience-result">
-        <div class="result-canvas">
-          <span class="i-mdi-image-search-outline" />
-          <span>人员越界 96%</span>
-          <span>叉车运行 91%</span>
-          <span>烟火风险 18%</span>
-        </div>
-        <div class="log-list">
-          <div v-for="log in experienceLogs" :key="log" class="log-item">{{ log }}</div>
-        </div>
-      </div>
-    </section>
 
-    <section class="official-card content-card">
-      <div class="official-filter-panel filter-panel">
-        <a-space wrap size="middle">
-          <template v-for="field in config.filters" :key="field.key">
-            <a-input
-              v-if="field.type === 'input'"
-              allow-clear
-              :placeholder="field.placeholder"
-              :style="{ width: `${field.width || 220}px` }"
-            />
-            <a-select
-              v-else
-              allow-clear
-              :placeholder="field.placeholder"
-              :style="{ width: `${field.width || 160}px` }"
-              :options="field.options"
-            />
-          </template>
-          <a-button type="primary">查询</a-button>
-          <a-button>重置</a-button>
-        </a-space>
-      </div>
-
-      <div class="cards-grid">
-        <article
-          v-for="card in config.cards"
-          :key="card.title"
-          class="catalog-card"
-        >
-          <div class="card-head">
-            <div>
-              <div class="card-title-row">
-                <h3 class="card-title">{{ card.title }}</h3>
-                <a-tag v-if="card.source" color="green">{{ card.source }}</a-tag>
+        <transition name="filter-collapse">
+          <div v-show="showFilter" class="filter-options-wrap">
+            <div class="tag-row">
+              <div class="tag-label">模型分类</div>
+              <div class="tag-list">
+                <div 
+                  class="tag-item"
+                  :class="{ active: searchForm.category.length === 0 }"
+                  @click="toggleCategory('全部')"
+                >
+                  全部
+                </div>
+                <template v-for="cat in categories.filter(c => c !== '全部')" :key="cat">
+                <div v-if="cat === '多模态大模型'" class="divider" style="color: #e5e6eb;">|</div>
+                <div 
+                  class="tag-item"
+                  :class="{ active: searchForm.category.includes(cat) }"
+                  @click="toggleCategory(cat)"
+                >
+                  <span v-if="cat === '多模态大模型'" class="i-mdi-star-four-points-outline" style="margin-right: 4px; font-size: 14px;"></span>
+                  {{ cat }}
+                  <span v-if="searchForm.category.includes(cat)" class="i-mdi-close close-icon" @click.stop="toggleCategory(cat)"></span>
+                </div>
+              </template>
               </div>
-              <p class="card-subtitle">{{ card.subtitle }}</p>
             </div>
-            <button class="card-enter" type="button" @click="openDetail(card)">
-              <span class="i-mdi-arrow-top-right" />
-            </button>
-          </div>
 
-          <div v-if="card.tags?.length" class="card-tags">
-            <a-tag v-for="tag in card.tags" :key="tag" color="blue">{{ tag }}</a-tag>
+            <div class="tag-row">
+              <div class="tag-label">AI加速硬件</div>
+              <div class="tag-list">
+                <div 
+                  class="tag-item"
+                  :class="{ active: searchForm.hardware.length === 0 }"
+                  @click="toggleHardware('全部')"
+                >
+                  全部
+                </div>
+                <div 
+                v-for="hw in hardwareOptions.filter(h => h !== '全部')" 
+                :key="hw"
+                class="tag-item"
+                :class="{ active: searchForm.hardware.includes(hw) }"
+                @click="toggleHardware(hw)"
+              >
+                {{ hw }}
+                <span v-if="searchForm.hardware.includes(hw)" class="i-mdi-close close-icon" @click.stop="toggleHardware(hw)"></span>
+              </div>
+              </div>
+            </div>
           </div>
+        </transition>
+      </div>
 
-          <div class="card-meta">
-            <span v-for="line in card.meta" :key="line">{{ line }}</span>
-          </div>
-
-          <div class="card-actions">
-            <a-button size="small" @click="openDetail(card)">查看详情</a-button>
-            <a-button size="small" type="primary" @click="useTemplate(card)">
-              {{ config.experience ? '立即体验' : '添加技能' }}
+      <!-- Cards Grid -->
+      <div class="model-grid">
+        <!-- Banner Card -->
+        <div class="model-card banner-card">
+          <div class="banner-content">
+            <h2 class="banner-title">一见多模态大模型-VQA-Pro</h2>
+            <p class="banner-subtitle">一见多模态大模型-VQA-Pro</p>
+            <a-button type="primary" class="experience-btn">
+              立即体验 <span class="i-mdi-arrow-right" style="margin-left: 4px;"></span>
             </a-button>
           </div>
-        </article>
-      </div>
-    </section>
-
-    <a-drawer
-      :open="Boolean(selectedCard)"
-      :title="selectedCard?.title"
-      width="520"
-      @close="selectedCard = null"
-    >
-      <template #footer>
-        <a-space v-if="selectedCard">
-          <a-button @click="selectedCard = null">取消</a-button>
-          <a-button type="primary" @click="useTemplate(selectedCard)">
-            {{ config.experience ? '立即体验' : '添加到工作空间' }}
-          </a-button>
-        </a-space>
-      </template>
-      <template v-if="selectedCard">
-        <p class="drawer-desc">{{ selectedCard.subtitle }}</p>
-        <a-descriptions bordered size="small" :column="1">
-          <a-descriptions-item label="来源">{{ selectedCard.source || '官方模板' }}</a-descriptions-item>
-          <a-descriptions-item label="适用场景">{{ selectedCard.scenario || '园区安全生产、视频巡检、预警联动' }}</a-descriptions-item>
-          <a-descriptions-item label="推荐流程">{{ selectedCard.workflow || '添加到工作空间 → 绑定模型 → 配置点位 → 发布运行计划' }}</a-descriptions-item>
-        </a-descriptions>
-        <div class="drawer-section">
-          <h4>能力标签</h4>
-          <a-space wrap>
-            <a-tag v-for="tag in selectedCard.tags" :key="tag" color="blue">{{ tag }}</a-tag>
-          </a-space>
+          <div class="banner-bg"></div>
         </div>
-        <div class="drawer-section">
-          <h4>关键指标</h4>
-          <div class="drawer-meta">
-            <span v-for="line in selectedCard.meta" :key="line">{{ line }}</span>
+
+        <!-- Normal Cards -->
+        <div v-for="model in filteredModels" :key="model.id" class="model-card normal-card" @click="goToDetail(model.id)">
+          <div class="card-content">
+            <div class="card-header">
+              <div class="icon-wrap">
+                <span :class="model.icon"></span>
+              </div>
+              <div class="title-wrap">
+                <h3 class="model-title" :title="model.title">{{ model.title }}</h3>
+                <div class="model-id">
+                  <span class="id-tag">ID</span> {{ model.id }}
+                </div>
+              </div>
+            </div>
+            <div class="card-tags">
+              <span class="tag"><span class="i-mdi-file-document-outline"></span> {{ model.category }}</span>
+              <span class="tag hardware-tag"><span class="i-mdi-memory"></span> {{ model.hardware }}</span>
+            </div>
+          </div>
+          
+          <div class="card-hover-mask">
+            <a-button class="view-detail-btn" block @click.stop="goToDetail(model.id)">查看详情</a-button>
+          </div>
+          
+          <div class="card-footer">
+            <span class="provider">百度一见</span>
+            <span class="date">{{ model.date }} 更新</span>
           </div>
         </div>
-      </template>
-    </a-drawer>
+      </div>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.skill-catalog-page {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.scene-model-page {
+  padding: 24px;
+  min-height: 100vh;
+  background: #fff;
 }
 
-.hero-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 22px 24px;
-  background:
-    radial-gradient(circle at right top, rgba(36, 104, 242, 0.12), transparent 34%),
-    linear-gradient(135deg, #fff 0%, #f5f8ff 100%);
-}
-
-.hero-copy {
-  flex: 1;
-}
-
-.hero-title {
-  margin: 0 0 8px;
-  font-size: 24px;
-  font-weight: 700;
-  color: #17325c;
-}
-
-.hero-subtitle,
-.section-desc,
-.drawer-desc {
-  margin: 0;
-  color: #61708f;
-  line-height: 1.7;
-}
-
-.hero-subtitle {
-  max-width: 720px;
-}
-
-.hero-actions,
-.card-actions,
-.experience-controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.metric-dot {
-  width: 10px;
-  height: 36px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-.experience-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 18px;
-  padding: 18px;
-}
-
-.compact-head {
-  padding: 0 0 12px;
-}
-
-.section-title {
-  margin: 0 0 4px;
-  font-size: 18px;
-  color: #1b2d4e;
-}
-
-.experience-controls {
-  align-items: center;
-  margin: 12px 0;
-  color: #52617d;
-}
-
-.threshold-slider {
-  flex: 1;
-  min-width: 180px;
-}
-
-.experience-result {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.result-canvas {
-  min-height: 168px;
-  border: 1px dashed #9bb8f8;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #eef4ff, #f8fbff);
-  color: #2468f2;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-
-  svg {
-    width: 42px;
-    height: 42px;
+.official-page-head {
+  padding: 0 !important;
+  background: #fff;
+  padding-bottom: 16px;
+  .official-page-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1d2129;
+    margin: 0;
   }
 }
 
-.log-list {
-  display: grid;
-  gap: 8px;
+.official-card {
+  background: #fff;
+  border-radius: 8px;
 }
 
-.log-item {
-  padding: 9px 12px;
-  border-radius: 10px;
-  background: #f6f8fc;
-  color: #52617d;
-  font-size: 12px;
+/* Filters */
+.filter-section {
+  border-radius: 4px;
+  margin-bottom: 24px;
 }
 
-.content-card {
-  padding: 16px;
-}
-
-.filter-panel {
-  margin-bottom: 16px;
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.catalog-card {
-  border: 1px solid #e6ebf5;
-  border-radius: 16px;
-  padding: 18px;
-  background: linear-gradient(180deg, #fff 0%, #fafcff 100%);
-  box-shadow: 0 4px 14px rgba(24, 41, 75, 0.04);
-}
-
-.card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.card-title-row {
+.filter-toggle-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  color: #1d2129;
+  border-color: #d9d9d9;
+  
+  &.is-active {
+    color: #1677ff;
+    border-color: #1677ff;
+    
+    .i-mdi-menu-down {
+      color: #1677ff !important;
+    }
+  }
 }
 
-.card-title {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  color: #1b2d4e;
-}
-
-.card-subtitle {
-  margin: 10px 0 0;
-  color: #66748f;
-  line-height: 1.7;
-}
-
-.card-enter {
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 12px;
-  background: #eef4ff;
-  color: #2468f2;
+.clear-filter-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-color: #d9d9d9;
+  
+  &.is-active {
+    border-color: #1677ff;
+  }
 }
 
-.card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0 12px;
+.filter-btn-group {
+  .ant-btn {
+    &:focus, &:hover {
+      z-index: 1;
+    }
+  }
 }
 
-.card-meta,
-.drawer-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  color: #8a95ad;
+.filter-badge {
+  background: #e6f4ff;
+  color: #1677ff;
   font-size: 12px;
+  line-height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  min-width: 16px;
+  text-align: center;
+  font-weight: 500;
 }
 
-.card-actions {
-  justify-content: flex-end;
-  margin-top: 16px;
-}
-
-.drawer-section {
-  margin-top: 18px;
-
-  h4 {
-    margin: 0 0 10px;
-    color: #1b2d4e;
+.search-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  
+  :deep(.ant-input-affix-wrapper) {
+    border-radius: 4px;
   }
 }
 
-@media (max-width: 1080px) {
-  .stats-grid,
-  .cards-grid,
-  .experience-card {
-    grid-template-columns: 1fr;
+.filter-options-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tag-row {
+  display: flex;
+  align-items: flex-start;
+  font-size: 14px;
+}
+
+.tag-label {
+  color: #86909c;
+  width: 90px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  flex: 1;
+  align-items: center;
+}
+
+.tag-item {
+    cursor: pointer;
+    color: #4e5969;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 4px;
+    gap: 4px;
+
+    &:hover {
+      color: #1677ff;
+    }
+
+    &.active {
+      color: #1677ff;
+      font-weight: 500;
+      background: #e8f3ff;
+    }
+    
+    .close-icon {
+      font-size: 14px;
+      margin-left: 2px;
+      margin-right: -4px;
+      opacity: 0.8;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
-  .hero-card {
-    flex-direction: column;
-    align-items: flex-start;
+.filter-collapse-enter-active,
+.filter-collapse-leave-active {
+  transition: all 0.3s ease-in-out;
+  max-height: 300px;
+  opacity: 1;
+}
+
+.filter-collapse-enter-from,
+.filter-collapse-leave-to {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.divider {
+  color: #e5e6eb;
+  margin: 0 8px;
+}
+
+/* Grid */
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+/* Cards */
+.model-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+
+  &:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    
+    .card-hover-mask {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Banner Card */
+.banner-card {
+  grid-column: span 1;
+  @media (min-width: 1440px) {
+    grid-column: span 2;
+  }
+  background: linear-gradient(135deg, #e6f0ff 0%, #d6e8ff 100%);
+  border: none;
+  display: flex;
+  padding: 32px 24px;
+  justify-content: space-between;
+  
+  .banner-content {
+    position: relative;
+    z-index: 2;
+    max-width: 60%;
+  }
+
+  .banner-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1d2129;
+    margin-bottom: 8px;
+  }
+
+  .banner-subtitle {
+    font-size: 14px;
+    color: #4e5969;
+    margin-bottom: 24px;
+  }
+
+  .experience-btn {
+    background: #1d2129;
+    border-color: #1d2129;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 36px;
+    
+    &:hover {
+      background: #4e5969;
+      border-color: #4e5969;
+    }
+  }
+
+  .banner-bg {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 200px;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23ffffff" fill-opacity="0.3" x="20" y="20" width="60" height="60" rx="10"/></svg>') no-repeat right bottom;
+    background-size: contain;
+    z-index: 1;
+  }
+}
+
+/* Normal Card */
+.normal-card {
+  cursor: pointer;
+  padding: 24px 20px 20px;
+  justify-content: space-between;
+  min-height: 250px;
+  
+  .card-content {
+    flex: 1;
+  }
+
+  .card-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4b8af3, #2468f2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .title-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .model-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1d2129;
+    margin: 0 0 6px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .model-id {
+    font-size: 12px;
+    color: #86909c;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    
+    .id-tag {
+      border: 1px solid #e5e6eb;
+      border-radius: 2px;
+      padding: 0 4px;
+      font-size: 10px;
+      line-height: 14px;
+    }
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f2f3f5;
+      color: #4e5969;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  }
+  
+  .card-hover-mask {
+    position: absolute;
+    bottom: 56px;
+    left: 20px;
+    right: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    background: #fff;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    
+    .view-detail-btn {
+      color: #1677ff;
+      border-color: #1677ff;
+      border-radius: 4px;
+      height: 32px;
+      background: transparent;
+      
+      &:hover {
+        color: #1677ff;
+        border-color: #1677ff;
+        background: #f0f5ff;
+      }
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #86909c;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 16px;
+    margin-top: auto;
   }
 }
 </style>

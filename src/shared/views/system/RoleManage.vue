@@ -524,6 +524,8 @@ onMounted(load);
 
 .detail-content {
   padding: 24px;
+  overflow-y: auto;
+  height: calc(100vh - 64px);
 }
 
 .detail-section {
@@ -605,6 +607,8 @@ onMounted(load);
   border: 1px solid #e5e6eb;
   border-radius: 4px;
   overflow: hidden;
+  margin-bottom: 24px;
+  padding-bottom: 1px;
 }
 
 .custom-tree-table :deep(.ant-table) {

@@ -65,7 +65,11 @@ onMounted(() => {
 });
 
 function goBack() {
-  router.push('/vision/skill-store/list');
+  if (route.path.includes('/studio/')) {
+    router.push('/studio/explore/skills');
+  } else {
+    router.push('/vision/skill-store/list');
+  }
 }
 
 // Auth Modal Logic
@@ -120,7 +124,9 @@ function confirmAddAsset() {
 }
 
 function openTaskCenter() {
-  window.open('http://localhost:5173/vision/asset/skills', '_blank');
+  showMessage.value = false;
+  if (countdownTimer) clearInterval(countdownTimer);
+  router.push({ path: '/vision/asset/skills', query: { openTaskCenter: 'true' } });
 }
 
 </script>

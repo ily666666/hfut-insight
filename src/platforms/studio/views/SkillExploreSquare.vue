@@ -230,7 +230,7 @@ function removeFile() {
 }
 
 function openAuthManage() {
-  const routeUrl = router.resolve({ path: '/vision/skill-store/auth' });
+  const routeUrl = router.resolve({ path: '/studio/explore/skills/auth' });
   window.open(routeUrl.href, '_blank');
 }
 
@@ -275,21 +275,7 @@ let progressTimer: any = null;
 function openTaskCenter() {
   showMessage.value = false;
   if (countdownTimer) clearInterval(countdownTimer);
-  taskCenterVisible.value = true;
-  
-  // 模拟进度条动画
-  if (progressTimer) clearInterval(progressTimer);
-  const importTasks = allTaskData['1'];
-  if (importTasks && importTasks.length > 0 && importTasks[0].status === '导入中') {
-    progressTimer = setInterval(() => {
-      if (importTasks[0].progress !== undefined && importTasks[0].progress < 100) {
-        importTasks[0].progress += 5;
-      } else if (importTasks[0].progress === 100) {
-        importTasks[0].status = '导入成功';
-        clearInterval(progressTimer);
-      }
-    }, 500);
-  }
+  router.push({ path: '/vision/asset/skills', query: { openTaskCenter: 'true' } });
 }
 
 // Delete Task Logic
@@ -529,7 +515,8 @@ function goToAssetSkills() {
 function goToSkillDetail(skill: any) {
   // 跳转到技能详情页
   const skillId = skill.id === 2 ? 'c-sk-t8gpe1i2' : (skill.id === 1 ? 'c-sk-t8gpe1i1' : skill.id);
-  router.push(`/vision/skill-store/detail/${skillId}`);
+  const routeUrl = router.resolve({ path: `/studio/explore/skills/detail/${skillId}` });
+  window.open(routeUrl.href, '_blank');
 }
 
 </script>
