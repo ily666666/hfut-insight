@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import type { Connection } from '@vue-flow/core';
 import { Handle, Position, VueFlow, useVueFlow } from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
@@ -44,7 +45,9 @@ interface SkillFlowEdge {
 const nodes = ref<SkillFlowNode[]>(INITIAL_ORCHESTRATE_NODES.map((item) => ({ ...item })));
 const edges = ref<SkillFlowEdge[]>(INITIAL_ORCHESTRATE_EDGES.map((item) => ({ ...item })));
 const selectedNodeId = ref('vision-1');
-const activeCategory = ref('全部节点');
+const activeCategory = ref(['模型节点', '处理节点', '判断节点']);
+// Ensure display mode is grid by default
+  const displayMode = ref<'grid' | 'list'>('grid');
 const validationErrors = ref<string[]>([]);
 const publishOpen = ref(false);
 const publishTarget = ref('发布技能');
@@ -60,6 +63,25 @@ const skillMeta = reactive({
   status: '草稿',
 });
 const { fitView, removeNodes, removeEdges } = useVueFlow();
+const route = useRoute();
+const router = useRouter();
+
+watch(
+  () => route.query,
+  (query) => {
+    if (typeof query.name === 'string' && query.name) {
+      skillMeta.name = query.name;
+    }
+    if (typeof query.status === 'string' && query.status) {
+      skillMeta.status = query.status.includes('已发布') ? '已发布' : '草稿';
+    }
+  },
+  { immediate: true },
+);
+
+function goBack() {
+  router.push('/studio/workspace/orchestrate');
+}
 
 const categories = computed(() => ['全部节点', ...new Set(ORCHESTRATE_NODE_PALETTE.map((item) => item.category))]);
 const palette = computed(() => {
@@ -229,6 +251,24 @@ function onSave() {
   message.success('技能编排草稿已保存（仿真）。');
 }
 
+const editSkillOpen = ref(false);
+const editSkillForm = reactive({
+  name: '嗯嗯',
+  description: '嗯嗯',
+});
+
+function onEditSkill() {
+  editSkillForm.name = skillMeta.name;
+  editSkillForm.description = '嗯嗯';
+  editSkillOpen.value = true;
+}
+
+function confirmEditSkill() {
+  skillMeta.name = editSkillForm.name;
+  editSkillOpen.value = false;
+  message.success('技能基础信息已保存');
+}
+
 function onPublish(label: string) {
   if (!validateFlow(false)) {
     message.warning('请先修复编排校验问题。');
@@ -245,84 +285,103 @@ function confirmPublish() {
 </script>
 
 <template>
-  <div class="official-page skill-orchestrate-page">
-    <section class="official-card hero-card">
-      <div class="official-page-head">
-        <div>
-          <div class="title-row">
-            <h1 class="official-page-title">技能编排</h1>
-            <a-tag color="blue">{{ skillMeta.status }}</a-tag>
-            <a-tag>{{ skillMeta.version }}</a-tag>
+  <div class="official-page skill-orchestrate-page" style="padding: 0; background: #f2f3f5; border-bottom: 1px solid #f0f0f0;">
+    <section class="official-card hero-card" style="border: none; box-shadow: none; border-bottom: 1px solid #e5e6eb; padding: 12px 16px; padding-left: 8px; background: #fff; border-radius: 0; height: 60px; display: flex; align-items: center;">
+      <div class="official-page-head" style="margin-bottom: 0; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+             <a-button type="text" style="padding: 0; display: flex; align-items: center; color: #1d2129; margin-left: -22px;" @click="goBack">
+              <span class="i-mdi-chevron-left" style="font-size: 24px;"></span>
+            </a-button>
+            <div class="skill-icon-placeholder" style="width: 32px; height: 32px; background: #1677ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff;">
+            <span class="i-mdi-sitemap" style="font-size: 20px;"></span>
           </div>
-          <p>
-            参考识界技能生产文档，将模型、处理、判断和输出节点编排成可发布到视觉应用或技能 API 的视觉 AI 能力。
-          </p>
-        </div>
-        <div class="official-toolbar">
-          <a-button>导入模板</a-button>
-          <a-button @click="onSave">保存草稿</a-button>
-          <a-button @click="validateFlow(true)">校验</a-button>
-          <a-button @click="onPublish('发布技能')">发布</a-button>
-          <a-button type="primary" @click="onPublish('发布到视觉应用')">发布到视觉应用</a-button>
-          <a-button type="primary" ghost @click="onPublish('发布为技能 API')">发布为技能 API</a-button>
-        </div>
-      </div>
-      <div class="stats-grid">
-        <article v-for="item in ORCHESTRATE_STATS" :key="item.label" class="official-metric">
           <div>
-            <div class="official-metric-value">{{ item.value }}</div>
-            <div class="official-metric-label">{{ item.label }}</div>
-            <p>{{ item.desc }}</p>
+            <div class="title-row" style="margin-bottom: 4px; display: flex; align-items: center;">
+              <h1 class="official-page-title" style="font-size: 16px; margin: 0; font-weight: 500; text-align: left;">{{ skillMeta.name }}</h1>
+              <a-button type="text" size="small" style="color: #86909c; padding: 0 4px;" @click="onEditSkill">
+                <span class="i-mdi-square-edit-outline" style="font-size: 16px;"></span>
+              </a-button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #86909c;">
+              <span style="background: #f2f3f5; padding: 2px 6px; border-radius: 4px; display: flex; align-items: center; gap: 4px;">
+                ID: {{ typeof route.query.id === 'string' && route.query.id ? route.query.id : 'c-sk-ecppnvem' }}
+                <span class="i-mdi-content-copy" style="cursor: pointer;"></span>
+              </span>
+              <span style="display: flex; align-items: center; gap: 4px;">
+                <span class="i-mdi-check-circle-outline"></span>
+                保存于2026-06-09 17:21:02
+              </span>
+            </div>
           </div>
-        </article>
+        </div>
+        <div class="official-toolbar" style="display: flex; gap: 12px; align-items: center;">
+          <a-button type="text" style="color: #86909c; padding: 0 8px;"><span class="i-mdi-history" style="font-size: 16px;"></span></a-button>
+          <a-button><span class="i-mdi-play-outline" style="margin-right: 4px;"></span>试运行</a-button>
+          <a-button>预发布</a-button>
+          <a-button type="primary" @click="onPublish('发布技能')"><span class="i-mdi-send-outline" style="margin-right: 4px;"></span>发布</a-button>
+          <a-button type="text" style="color: #86909c; padding: 0 8px;"><span class="i-mdi-content-copy" style="font-size: 16px;"></span></a-button>
+        </div>
       </div>
     </section>
 
-    <section class="official-card editor-shell">
-      <aside class="node-palette">
-        <div class="panel-head">
-          <strong>节点库</strong>
-          <span>拖入或点击添加</span>
+    <section class="official-card editor-shell" style="border: none; box-shadow: none; padding: 0; background: transparent;">
+      <aside class="node-palette" style="border-radius: 12px; margin-left: 12px; margin-bottom: 12px; height: calc(100vh - 84px); display: flex; flex-direction: column; width: 240px; padding: 12px 0 0 0; position: relative;">
+        <div class="panel-head" style="padding: 0 16px; margin-bottom: 8px;">
+          <a-input placeholder="搜索节点名称及描述" style="width: 100%; border-radius: 4px; border-color: #d9d9d9;" class="custom-search">
+            <template #suffix>
+              <span class="i-mdi-magnify" style="color: #86909c; cursor: pointer; font-size: 16px;"></span>
+            </template>
+          </a-input>
         </div>
-        <a-segmented v-model:value="activeCategory" :options="categories" size="small" block />
-        <div class="palette-list">
-          <button
-            v-for="item in palette"
-            :key="item.kind"
-            class="palette-card"
-            type="button"
-            @click="addNode(item.kind)"
-          >
-            <span class="palette-icon" :style="{ color: item.color, backgroundColor: `${item.color}14` }">
-              <span :class="item.icon" />
-            </span>
-            <span>
-              <strong>{{ item.title }}</strong>
-              <em>{{ item.description }}</em>
-            </span>
-          </button>
+        
+        <div style="flex: 1; overflow-y: auto; overflow-x: hidden;">
+          <a-collapse v-model:activeKey="activeCategory" :bordered="false" style="background: transparent;" class="custom-collapse" expand-icon-position="end">
+            <a-collapse-panel v-for="cat in ['模型节点', '处理节点', '判断节点']" :key="cat" style="border-bottom: 0; padding: 0;">
+              <template #header>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <span style="font-weight: 500; font-size: 13px; color: #1d2129;">{{ cat }}</span>
+                  <span class="i-mdi-help-circle-outline" style="color: #c9cdd4; font-size: 14px;"></span>
+                </div>
+              </template>
+              <div class="palette-list" style="padding: 0 8px;">
+                <button
+                  v-for="item in ORCHESTRATE_NODE_PALETTE.filter(p => (cat === '模型节点' && ['视觉模型节点', '多模态大模型节点', '视觉模型', '多模态大模型'].includes(p.title)) || (cat === '判断节点' && ['条件分支', '判断节点'].includes(p.title)) || (cat === '处理节点' && !['视觉模型节点', '多模态大模型节点', '视觉模型', '多模态大模型', '条件分支', '判断节点', '开始节点', '结束节点', '开始', '结束'].includes(p.title)))"
+                  :key="item.kind"
+                  class="palette-card"
+                  type="button"
+                  @click="addNode(item.kind)"
+                  style="border: none; background: transparent; padding: 8px; align-items: flex-start; gap: 8px; margin-bottom: 0;"
+                >
+                  <span class="palette-icon" :style="{ color: item.color, backgroundColor: `${item.color}14`, width: '24px', height: '24px', borderRadius: '4px', fontSize: '14px', marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }">
+                    <span :class="item.icon" />
+                  </span>
+                  <span style="flex: 1;">
+                    <strong style="font-size: 13px; font-weight: 500; margin-bottom: 2px; color: #1d2129;">{{ item.title.replace('节点', '') }} <span style="float: right; background: #f2f3f5; color: #86909c; font-weight: normal; font-size: 12px; padding: 0 4px; border-radius: 4px; transform: scale(0.83); transform-origin: right center;">V2</span></strong>
+                    <div style="color: #86909c; font-size: 12px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-style: normal; white-space: normal;">{{ item.description }}</div>
+                  </span>
+                </button>
+              </div>
+            </a-collapse-panel>
+          </a-collapse>
         </div>
-        <a-alert
-          type="info"
-          show-icon
-          message="节点能力"
-          description="处理节点覆盖区域过滤、尺寸过滤、距离、计数、绊线、位移和目标抠图等识界能力。"
-        />
+        
+        <div style="width: 4px; height: 32px; background: #e5e6eb; border-radius: 4px; position: absolute; right: 2px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10;"></div>
       </aside>
 
-      <main class="canvas-panel">
-        <div class="canvas-toolbar">
-          <div>
-            <strong>{{ skillMeta.name }}</strong>
-            <span>开始 → 模型 → 判断 → 处理/大模型 → 结束</span>
+      <main class="canvas-panel" style="background: transparent; border: none; border-radius: 0;">
+        <div class="flow-wrap" style="background: transparent; position: relative;">
+          <div class="canvas-toolbar" style="background: transparent; border-bottom: none; position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 10; padding: 0;">
+            <div style="background: white; padding: 6px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); display: flex; gap: 8px;">
+              <a-button type="text" style="padding: 4px 8px; color: #4e5969;"><span class="i-mdi-view-grid-outline"></span></a-button>
+              <a-button type="text" style="padding: 4px 8px; color: #4e5969;" @click="fitView({ padding: 0.2 })"><span class="i-mdi-fit-to-page-outline"></span></a-button>
+              <div style="width: 1px; height: 20px; background: #e5e6eb; margin: auto 4px;"></div>
+              <a-button type="text" style="padding: 4px 8px; color: #4e5969;"><span class="i-mdi-magnify-minus-outline"></span></a-button>
+              <span style="font-size: 13px; color: #1d2129; line-height: 32px; padding: 0 4px;">67%</span>
+              <a-button type="text" style="padding: 4px 8px; color: #4e5969;"><span class="i-mdi-magnify-plus-outline"></span></a-button>
+              <div style="width: 1px; height: 20px; background: #e5e6eb; margin: auto 4px;"></div>
+              <a-button type="text" style="padding: 4px 8px; color: #4e5969;"><span class="i-mdi-arrow-collapse-all"></span></a-button>
+            </div>
           </div>
-          <a-space>
-            <a-button size="small" @click="fitView({ padding: 0.2 })">适应画布</a-button>
-            <a-button size="small" danger @click="clearEdges">清空连线</a-button>
-            <a-button size="small" danger :disabled="!selectedNode" @click="deleteSelection">删除节点</a-button>
-          </a-space>
-        </div>
-        <div class="flow-wrap">
           <VueFlow
             v-model:nodes="nodes"
             v-model:edges="edges"
@@ -332,8 +391,7 @@ function confirmPublish() {
             @node-click="({ node }) => selectedNodeId = node.id"
           >
             <Background pattern-color="#d7e2f2" :gap="18" />
-            <Controls />
-            <MiniMap pannable zoomable node-color="#2468f2" />
+            <MiniMap pannable zoomable node-color="#2468f2" style="display: none;" />
             <template #node-skillNode="nodeProps">
               <div class="skill-node" :class="{ 'is-selected': nodeProps.selected }">
                 <Handle type="target" :position="Position.Left" />
@@ -359,15 +417,17 @@ function confirmPublish() {
         </div>
       </main>
 
-      <aside class="config-panel">
-        <div class="panel-head">
-          <strong>节点配置</strong>
-          <span>{{ selectedNodeData?.title || '未选择节点' }}</span>
+      <aside v-if="selectedNodeData" class="config-panel" style="border-radius: 12px; margin-right: 12px; margin-bottom: 12px; height: calc(100vh - 84px); width: 280px; display: flex; flex-direction: column; padding: 0; position: relative;">
+        <div class="panel-head" style="padding: 16px 16px 0; margin-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <strong style="font-size: 14px; font-weight: 600;">节点配置</strong>
+            <span style="font-size: 12px; color: #86909c;">视觉模型节点</span>
+          </div>
         </div>
         <template v-if="selectedNodeData">
-          <a-tabs size="small">
+          <a-tabs size="small" style="padding: 0 16px; flex: 1; overflow-y: auto;">
             <a-tab-pane key="base" tab="基础配置">
-              <a-form layout="vertical">
+              <a-form layout="vertical" style="margin-top: 12px;">
                 <a-form-item label="节点名称">
                   <a-input :value="selectedNodeData.title" @change="onTitleChange" />
                 </a-form-item>
@@ -443,7 +503,9 @@ function confirmPublish() {
             </a-tab-pane>
           </a-tabs>
         </template>
-        <a-empty v-else description="请选择画布中的节点" />
+        <div style="position: absolute; left: -16px; top: 50%; transform: translateY(-50%); cursor: pointer; width: 16px; height: 32px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 4px 0 0 4px; box-shadow: -2px 0 8px rgba(0,0,0,0.04); z-index: 10;">
+          <div style="width: 4px; height: 16px; background: #e5e6eb; border-radius: 2px;"></div>
+        </div>
       </aside>
     </section>
 
@@ -479,6 +541,35 @@ function confirmPublish() {
           message="发布后技能版本可在技能仓库管理"
           description="后续可下线 API、导出离线包、覆盖草稿或查看调用监控。"
         />
+      </a-form>
+    </a-modal>
+    <a-modal
+      v-model:open="editSkillOpen"
+      :title="`编辑技能（${skillMeta.name}）`"
+      width="640px"
+      ok-text="确定"
+      cancel-text="取消"
+      @ok="confirmEditSkill"
+    >
+      <a-form layout="vertical" class="publish-form" style="margin-top: 24px;">
+        <a-form-item label="技能名称" required>
+          <a-input v-model:value="editSkillForm.name" placeholder="请输入技能名称" suffix="2/100" />
+          <div style="font-size: 12px; color: #86909c; margin-top: 4px;">仅支持数字、中文、大小写英文字母、非特殊符号，不允许空格</div>
+        </a-form-item>
+        <a-form-item label="技能描述">
+          <a-textarea v-model:value="editSkillForm.description" :rows="3" placeholder="请输入技能描述" />
+          <div style="text-align: right; font-size: 12px; color: #86909c; margin-top: -24px; margin-right: 12px; position: relative; z-index: 1;">2/255</div>
+        </a-form-item>
+        <a-form-item label="自定义标签">
+          <a-button type="link" style="padding: 0;"><span class="i-mdi-plus"></span>添加标签 (0/20)</a-button>
+          <div style="font-size: 12px; color: #86909c; margin-top: 4px;">标签名不可重复，且标签名称和字符串类型标签内容仅支持字母、数字、中文、下划线“_”和连字符“-”</div>
+        </a-form-item>
+        <a-form-item label="技能配图" required>
+          <div style="width: 160px; height: 90px; border-radius: 8px; overflow: hidden; position: relative; cursor: pointer;">
+            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2070&auto=format&fit=crop" style="width: 100%; height: 100%; object-fit: cover;" />
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5); color: white; text-align: center; font-size: 12px; padding: 4px 0;">修改配图</div>
+          </div>
+        </a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -528,19 +619,26 @@ function confirmPublish() {
 .editor-shell {
   flex: 1;
   min-height: 620px;
-  display: grid;
-  grid-template-columns: 270px minmax(0, 1fr) 330px;
-  gap: 14px;
+  display: flex;
+  gap: 0;
   overflow: hidden;
+  position: relative;
+}
+
+.canvas-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: transparent;
 }
 
 .node-palette,
-.canvas-panel,
 .config-panel {
   min-height: 0;
-  border: 1px solid $divider;
-  border-radius: 16px;
+  border: none;
   background: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
 }
 
 .node-palette,
@@ -568,39 +666,62 @@ function confirmPublish() {
   margin: 12px 0;
 }
 
+.custom-search {
+  border-radius: 4px !important;
+}
+
+.custom-search:hover, .custom-search:focus-within {
+  border-color: #1677ff !important;
+  box-shadow: none !important;
+}
+
+.custom-search :deep(.ant-input) {
+  border: none !important;
+  box-shadow: none !important;
+}
+.custom-collapse :deep(.ant-collapse-item) {
+  border-bottom: none;
+}
+
+.custom-collapse :deep(.ant-collapse-header) {
+  padding: 8px 16px !important;
+  color: #1d2129;
+}
+
+.custom-collapse :deep(.ant-collapse-expand-icon) {
+  padding-inline-end: 8px !important;
+  transform: translateY(0);
+}
+
+.custom-collapse :deep(.ant-collapse-expand-icon svg) {
+  transform: rotate(90deg) scale(0.8) !important;
+}
+
+.custom-collapse :deep(.ant-collapse-item-active .ant-collapse-expand-icon svg) {
+  transform: rotate(-90deg) scale(0.8) !important;
+}
+
+.custom-collapse :deep(.ant-collapse-content-box) {
+  padding: 0 0 16px 0 !important;
+}
+
 .palette-card {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  padding: 12px;
+  padding: 8px;
   text-align: left;
-  border: 1px solid #e5edf9;
-  border-radius: 14px;
-  background: #f8fbff;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
   cursor: pointer;
   transition: all 0.2s;
+}
 
-  &:hover {
-    border-color: $brand-blue;
-    box-shadow: $shadow-card;
-    transform: translateY(-1px);
-  }
-
-  strong,
-  em {
-    display: block;
-  }
-
-  strong {
-    margin-bottom: 4px;
-    color: $text-primary;
-  }
-
-  em {
-    font-size: 12px;
-    font-style: normal;
-    line-height: 1.5;
-  }
+  
+.palette-card:hover {
+  background: #f2f3f5;
+  border-radius: 8px;
 }
 
 .palette-icon,

@@ -11,6 +11,7 @@ export const useTaskCenterStore = defineStore('task-center', () => {
   const activeCategory = ref<TaskCenterCategory>('import');
   const activeStatus = ref<TaskCenterFilterStatus>('all');
   const selectedModule = ref('all');
+  const buildPlanFilterId = ref<string | null>(null);
   const records = ref<TaskCenterRecord[]>([]);
 
   const categoryRecords = computed(() =>
@@ -38,13 +39,15 @@ export const useTaskCenterStore = defineStore('task-center', () => {
     };
   });
 
-  function open(category?: TaskCenterCategory) {
+  function open(category?: TaskCenterCategory, planId?: string) {
     if (category) activeCategory.value = category;
+    buildPlanFilterId.value = planId || null;
     visible.value = true;
   }
 
   function close() {
     visible.value = false;
+    buildPlanFilterId.value = null;
   }
 
   function toggle() {
@@ -69,6 +72,7 @@ export const useTaskCenterStore = defineStore('task-center', () => {
     activeCategory,
     activeStatus,
     selectedModule,
+    buildPlanFilterId,
     records,
     filteredRecords,
     statusCounts,

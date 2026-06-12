@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import type { RouteLocationMatched } from 'vue-router';
@@ -29,6 +29,7 @@ const primaryKey = computed(() => {
   return (rec?.meta.primary as string) || '';
 });
 
+const hidePrimary = computed(() => route.meta.hidePrimary === true);
 const hideSecondary = computed(() => route.meta.hideSecondary === true);
 
 const secondaryConfig = computed(() => {
@@ -41,6 +42,7 @@ const secondaryConfig = computed(() => {
 <template>
   <div class="app-layout">
     <PrimarySidebar
+      v-if="!hidePrimary"
       :active="primaryKey"
       :platform="platform"
       :items="PRIMARY_MENU[platform]"
@@ -48,7 +50,9 @@ const secondaryConfig = computed(() => {
     <SecondarySidebar v-if="secondaryConfig" :config="secondaryConfig" />
     <main class="app-main">
       <div class="app-content">
-        <RouterView />
+        <RouterView v-slot="{ Component }">
+          <component :is="Component" :key="route.fullPath" />
+        </RouterView>
       </div>
     </main>
     <TaskCenterDrawer />

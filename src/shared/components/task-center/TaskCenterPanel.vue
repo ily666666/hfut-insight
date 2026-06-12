@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import { useRoute } from 'vue-router';
 import type { TableColumnsType } from 'ant-design-vue';
@@ -26,6 +26,15 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const taskCenterStore = useTaskCenterStore();
+const tableLoading = ref(false);
+
+const categoryEmptyText: Record<TaskCenterCategory, string> = {
+  import: '暂无导入任务',
+  export: '暂无导出任务',
+  process: '暂无数据处理任务',
+  publish: '暂无发布任务',
+  annotation: '暂无标注任务',
+};
 
 const categoryTabs: Array<{
   key: TaskCenterCategory;
@@ -55,13 +64,44 @@ const currentPlatform = computed<PlatformKey>(() => {
   return 'vision';
 });
 
-const moduleOptions = computed(() => [
-  { value: 'all', label: '全部模块' },
-  ...PRIMARY_MENU[currentPlatform.value].map((item) => ({
-    value: item.key,
-    label: item.title,
-  })),
-]);
+const moduleOptions = computed(() => {
+  if (currentPlatform.value === 'studio') {
+    return [
+      { value: 'all', label: '全部模块' },
+      { value: 'data', label: '数据集' },
+    ];
+  }
+  return [
+    { value: 'all', label: '全部模块' },
+    ...PRIMARY_MENU[currentPlatform.value].map((item) => ({
+      value: item.key,
+      label: item.title,
+    })),
+  ];
+});
+
+function triggerTableLoading(action: () => void, duration = 600) {
+  tableLoading.value = true;
+  action();
+  window.setTimeout(() => {
+    tableLoading.value = false;
+  }, duration);
+}
+
+function onCategoryChange(category: TaskCenterCategory) {
+  if (taskCenterStore.activeCategory === category) return;
+  triggerTableLoading(() => taskCenterStore.setCategory(category));
+}
+
+function onStatusChange(status: TaskCenterFilterStatus) {
+  if (taskCenterStore.activeStatus === status) return;
+  triggerTableLoading(() => taskCenterStore.setStatus(status));
+}
+
+function onModuleChange(value: unknown) {
+  if (taskCenterStore.selectedModule === value) return;
+  triggerTableLoading(() => taskCenterStore.setModule(value));
+}
 
 const currentCategoryMeta = computed(
   () =>
@@ -124,6 +164,10 @@ const statusLabelMap = {
           <Icon icon="mdi:information" />
           <span>任务中心数据仅保留近3个月记录，到期后会自动清理！</span>
         </div>
+        <div v-if="taskCenterStore.buildPlanFilterId" class="panel-tip panel-tip-filter">
+          <Icon icon="mdi:information" />
+          <span>导入任务已根据数据集构建计划ID过滤</span>
+        </div>
       </div>
 
       <button
@@ -143,7 +187,7 @@ const statusLabelMap = {
         :key="item.key"
         :class="['category-tab', { 'is-active': taskCenterStore.activeCategory === item.key }]"
         type="button"
-        @click="taskCenterStore.setCategory(item.key)"
+        @click="onCategoryChange(item.key)"
       >
         {{ item.label }}
       </button>
@@ -156,7 +200,7 @@ const statusLabelMap = {
           :key="item.key"
           :class="['status-tab', { 'is-active': taskCenterStore.activeStatus === item.key }]"
           type="button"
-          @click="taskCenterStore.setStatus(item.key)"
+          @click="onStatusChange(item.key)"
         >
           {{ item.label }}({{ taskCenterStore.statusCounts[item.key] }})
         </button>
@@ -168,12 +212,18 @@ const statusLabelMap = {
           :value="taskCenterStore.selectedModule"
           :options="moduleOptions"
           style="width: 224px"
-          @update:value="taskCenterStore.setModule"
+          @update:value="onModuleChange"
         />
       </div>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-wrap" :class="{ 'is-loading': tableLoading }">
+      <div v-if="tableLoading" class="table-loading-overlay">
+        <div class="custom-spinner">
+          <div v-for="i in 8" :key="i" class="dot" />
+        </div>
+        <div class="loading-text">正在加载中</div>
+      </div>
       <a-table
         class="task-table"
         row-key="id"
@@ -206,7 +256,7 @@ const statusLabelMap = {
             <div class="task-empty-icon">
               <Icon icon="mdi:clipboard-text-search-outline" />
             </div>
-            <div class="task-empty-text">暂无{{ currentCategoryMeta.label }}</div>
+            <div class="task-empty-text">{{ categoryEmptyText[currentCategoryMeta.key] }}</div>
           </div>
         </template>
       </a-table>
@@ -388,6 +438,61 @@ const statusLabelMap = {
   min-height: 0;
   padding: 0 24px 24px;
   overflow: hidden;
+  position: relative;
+
+  &.is-loading {
+    .task-table {
+      opacity: 0.72;
+    }
+  }
+}
+
+.table-loading-overlay {
+  position: absolute;
+  inset: 0 24px 24px;
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 10;
+}
+
+.custom-spinner {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+
+.custom-spinner .dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: #1677ff;
+  border-radius: 50%;
+  animation: task-center-spinner-fade 1.2s linear infinite;
+}
+
+.custom-spinner .dot:nth-child(1) { --rotation: 0deg; transform: translate(-50%, -50%) translateY(-14px); animation-delay: -1.05s; }
+.custom-spinner .dot:nth-child(2) { --rotation: 45deg; transform: translate(-50%, -50%) rotate(45deg) translateY(-14px); animation-delay: -0.9s; }
+.custom-spinner .dot:nth-child(3) { --rotation: 90deg; transform: translate(-50%, -50%) rotate(90deg) translateY(-14px); animation-delay: -0.75s; }
+.custom-spinner .dot:nth-child(4) { --rotation: 135deg; transform: translate(-50%, -50%) rotate(135deg) translateY(-14px); animation-delay: -0.6s; }
+.custom-spinner .dot:nth-child(5) { --rotation: 180deg; transform: translate(-50%, -50%) rotate(180deg) translateY(-14px); animation-delay: -0.45s; }
+.custom-spinner .dot:nth-child(6) { --rotation: 225deg; transform: translate(-50%, -50%) rotate(225deg) translateY(-14px); animation-delay: -0.3s; }
+.custom-spinner .dot:nth-child(7) { --rotation: 270deg; transform: translate(-50%, -50%) rotate(270deg) translateY(-14px); animation-delay: -0.15s; }
+.custom-spinner .dot:nth-child(8) { --rotation: 315deg; transform: translate(-50%, -50%) rotate(315deg) translateY(-14px); animation-delay: 0s; }
+
+@keyframes task-center-spinner-fade {
+  0% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) translateY(-14px) scale(1); }
+  100% { opacity: 0.15; transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) translateY(-14px) scale(0.6); }
+}
+
+.loading-text {
+  color: #86909c;
+  font-size: 14px;
 }
 
 .task-table {

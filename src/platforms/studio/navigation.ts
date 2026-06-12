@@ -72,24 +72,14 @@ export const studioSecondaryMenu: Record<string, SecondaryMenuConfig> = {
             route: '/studio/workspace/repository',
           },
           {
+            key: 'skill-api',
+            title: '技能API',
+            route: '/studio/workspace/skill-api',
+          },
+          {
             key: 'evaluate',
-            title: '技能评测',
+            title: '技能测评',
             route: '/studio/workspace/evaluate',
-          },
-          {
-            key: 'api-management',
-            title: 'API管理',
-            route: '/studio/workspace/api-management',
-          },
-          {
-            key: 'api-reference',
-            title: 'API参考',
-            route: '/studio/workspace/api-reference',
-          },
-          {
-            key: 'offline-deploy',
-            title: '离线部署',
-            route: '/studio/workspace/offline-deploy',
           },
         ],
       },
@@ -99,14 +89,9 @@ export const studioSecondaryMenu: Record<string, SecondaryMenuConfig> = {
         icon: 'mdi:vector-polyline',
         children: [
           {
-            key: 'train-templates',
-            title: '训练模板',
-            route: '/studio/workspace/model-train/templates',
-          },
-          {
-            key: 'train-tasks',
-            title: '训练任务',
-            route: '/studio/workspace/model-train/tasks',
+            key: 'model-train',
+            title: '模型训练',
+            route: '/studio/workspace/model-train',
           },
           {
             key: 'model-repository',
@@ -121,26 +106,10 @@ export const studioSecondaryMenu: Record<string, SecondaryMenuConfig> = {
         ],
       },
       {
-        key: 'data-group',
+        key: 'data',
         title: '数据',
         icon: 'mdi:database-cog-outline',
-        children: [
-          {
-            key: 'dataset',
-            title: '数据集管理',
-            route: '/studio/workspace/data/datasets',
-          },
-          {
-            key: 'build-plans',
-            title: '构建计划管理',
-            route: '/studio/workspace/data/build-plans',
-          },
-          {
-            key: 'operators',
-            title: '处理算子管理',
-            route: '/studio/workspace/data/operators',
-          },
-        ],
+        route: '/studio/workspace/data',
       },
       {
         key: 'space',

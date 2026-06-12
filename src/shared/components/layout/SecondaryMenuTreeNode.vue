@@ -26,7 +26,7 @@ function onHeaderClick(item: SecondaryMenuItem) {
     v-if="!item.children?.length"
     :class="['menu-item', { 'is-active': activeKey === item.key, 'is-link': item.external }]"
     role="menuitem"
-    :style="{ paddingLeft: `${14 + depth * 18}px` }"
+    :style="{ paddingLeft: depth === 0 ? '14px' : '40px', paddingRight: '14px' }"
     @click="emit('navigate', item)"
   >
     <Icon v-if="item.icon" :icon="item.icon" class="menu-item-icon" />
@@ -36,14 +36,14 @@ function onHeaderClick(item: SecondaryMenuItem) {
 
   <li v-else :class="['submenu', { 'is-open': expandedKeys.has(item.key) }]" role="presentation">
     <div
-      class="menu-item is-submenu"
-      :style="{ paddingLeft: `${14 + depth * 18}px` }"
+      class="submenu-header"
+      :style="{ paddingLeft: '14px' }"
       role="menuitem"
       @click="onHeaderClick(item)"
     >
-      <Icon v-if="item.icon" :icon="item.icon" class="menu-item-icon" />
-      <span class="menu-item-text">{{ item.title }}</span>
-      <span class="menu-item-arrow i-mdi-chevron-down" />
+      <Icon v-if="item.icon" :icon="item.icon" class="submenu-icon" />
+      <span class="submenu-text">{{ item.title }}</span>
+      <span class="submenu-arrow i-mdi-chevron-down" />
     </div>
 
     <ul v-show="expandedKeys.has(item.key)" class="submenu-list" role="menu">
@@ -67,11 +67,11 @@ function onHeaderClick(item: SecondaryMenuItem) {
   display: flex;
   align-items: center;
   gap: 11px;
-  min-height: 46px;
-  margin-bottom: 8px;
+  min-height: 40px;
+  margin-bottom: 4px;
   border: 1px solid transparent;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.52);
+  border-radius: 8px;
+  background: transparent;
   color: #55617e;
   font-size: 14px;
   transition:
@@ -82,8 +82,7 @@ function onHeaderClick(item: SecondaryMenuItem) {
   cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(36, 104, 242, 0.1);
+    background: rgba(255, 255, 255, 0.6);
     color: $brand-blue;
   }
 
@@ -92,7 +91,7 @@ function onHeaderClick(item: SecondaryMenuItem) {
     border-color: rgba(36, 104, 242, 0.14);
     color: $brand-blue;
     box-shadow: 0 4px 12px rgba(36, 104, 242, 0.08);
-    font-weight: 700;
+    font-weight: 500;
   }
 }
 
@@ -114,13 +113,55 @@ function onHeaderClick(item: SecondaryMenuItem) {
   line-height: 1.2;
 }
 
-.menu-item-ext,
-.menu-item-arrow {
+.menu-item-ext {
   color: #8e99b3;
   flex-shrink: 0;
 }
 
-.submenu.is-open .menu-item-arrow {
+.submenu-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-bottom: 4px;
+  color: #1d2129;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding-right: 14px;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $brand-blue;
+  }
+}
+
+.submenu-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.submenu-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.submenu-arrow {
+  color: #8e99b3;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.submenu.is-open .submenu-arrow {
   transform: rotate(180deg);
 }
 

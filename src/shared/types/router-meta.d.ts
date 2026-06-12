@@ -4,6 +4,7 @@ import type { PlatformKey } from '@/shared/types/navigation';
 import type {
   SkillCatalogConfig,
   SkillTableConfig,
+  SkillWorkspaceListConfig,
 } from '@/platforms/studio/constants/skill-pages';
 
 declare module 'vue-router' {
@@ -16,6 +17,8 @@ declare module 'vue-router' {
     secondary?: string;
     /** 顶栏标题 */
     title?: string;
+    /** 为 true 时不展示一级侧边栏 */
+    hidePrimary?: boolean;
     /** 为 true 时不展示二级侧边栏（如任务中心） */
     hideSecondary?: boolean;
     /** 业务页工具条按钮，缺省为刷新+导出+新建 */
@@ -26,5 +29,7 @@ declare module 'vue-router' {
     catalogConfig?: SkillCatalogConfig;
     /** 技能表格页配置 */
     tableConfig?: SkillTableConfig;
+    /** 工作空间列表页配置（技能仓库 / 技能API / 技能测评） */
+    listConfig?: SkillWorkspaceListConfig;
   }
 }

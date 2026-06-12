@@ -38,6 +38,14 @@ function clearFilters() {
 
 const mockModels = [
   {
+    id: 'p-human_fstwl-T4-ensemble',
+    title: '人体车辆结构化识别',
+    category: '视觉/模型组件与检测',
+    hardware: '英伟达T4',
+    date: '2023-11-11 20:13:43',
+    icon: 'i-mdi-hexagon-multiple-outline'
+  },
+  {
     id: 'c-opaomateyuyifengemoxing-T4-moxb',
     title: '工厂注塑料产品缺陷 模型-T4-模型包',
     category: '视觉/模型包/语义分割',

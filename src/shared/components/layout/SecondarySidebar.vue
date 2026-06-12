@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -15,9 +15,15 @@ const router = useRouter();
 const activeKey = computed(() => route.meta.secondary as string | undefined);
 const expandedKeys = ref<Set<string>>(new Set());
 const collapsed = ref(false);
+const dropdownVisible = ref(false);
 
 function toggleCollapse() {
   collapsed.value = !collapsed.value;
+}
+
+function handleCreateWorkspace() {
+  dropdownVisible.value = false;
+  // TODO: Navigate or open modal
 }
 
 function isLeaf(item: SecondaryMenuItem): boolean {
@@ -82,10 +88,34 @@ function handleNavigate(item: SecondaryMenuItem) {
     <aside class="secondary-sidebar">
       <div class="title">{{ config.title }}</div>
 
-      <button v-if="config.contextLabel" class="context-chip" type="button">
-        <span>{{ config.contextLabel }}</span>
-        <Icon icon="mdi:chevron-down" />
-      </button>
+      <a-dropdown v-if="config.contextLabel" v-model:open="dropdownVisible" :trigger="['click']" placement="bottomLeft" :align="{ offset: [0, 4] }" overlayClassName="workspace-dropdown">
+        <button class="context-chip" type="button" :class="{ 'is-open': dropdownVisible }">
+          <div class="context-chip-left">
+            <div class="workspace-icon">
+              <Icon icon="mdi:account" />
+            </div>
+            <span class="workspace-divider"></span>
+            <span class="workspace-name">{{ config.contextLabel }}</span>
+          </div>
+          <Icon :icon="dropdownVisible ? 'mdi:chevron-up' : 'mdi:chevron-down'" style="color: #86909c;" />
+        </button>
+        <template #overlay>
+          <div class="workspace-dropdown-panel">
+            <div class="workspace-menu-item is-active">
+              <div class="workspace-icon">
+                <Icon icon="mdi:account" />
+              </div>
+              <span class="workspace-name">默认空间</span>
+              <Icon icon="mdi:check" class="check-icon" />
+            </div>
+            <div class="workspace-menu-divider"></div>
+            <div class="workspace-menu-item create-btn" @click="handleCreateWorkspace">
+              <Icon icon="mdi:plus" />
+              <span>创建工作空间</span>
+            </div>
+          </div>
+        </template>
+      </a-dropdown>
 
       <ul class="menu" role="menu">
         <SecondaryMenuTreeNode
@@ -196,15 +226,51 @@ function handleNavigate(item: SecondaryMenuItem) {
   margin: 0 14px 16px;
   height: 40px;
   border: 1px solid rgba(36, 104, 242, 0.12);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
-  color: #55617e;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d2129;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 12px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.is-open,
+  &:hover {
+    border-color: #1677ff;
+    color: #1677ff;
+  }
+
+  .context-chip-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .workspace-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: #1677ff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .workspace-divider {
+    width: 1px;
+    height: 12px;
+    background: #e5e6eb;
+  }
+
+  .workspace-name {
+    color: #1d2129;
+  }
 }
 
 .menu {
@@ -220,6 +286,88 @@ function handleNavigate(item: SecondaryMenuItem) {
   font-size: 12px;
   color: #a4afc7;
   border-top: 1px solid $divider;
+}
+</style>
+
+<style lang="scss">
+.workspace-dropdown {
+  .workspace-dropdown-panel {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    width: 186px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .workspace-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    gap: 8px;
+
+    &:hover {
+      background-color: #f2f3f5;
+    }
+
+    &.is-active {
+      background-color: #e8f3ff;
+      
+      .workspace-icon {
+        background-color: #1677ff;
+        color: #fff;
+      }
+      
+      .workspace-name {
+        color: #1677ff;
+        font-weight: 500;
+      }
+      
+      .check-icon {
+        color: #1677ff;
+        font-size: 16px;
+        margin-left: auto;
+      }
+    }
+
+    &.create-btn {
+      justify-content: center;
+      color: #1677ff;
+      font-weight: 500;
+      font-size: 14px;
+      
+      &:hover {
+        background-color: #f2f3f5;
+      }
+    }
+  }
+
+  .workspace-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: #c9cdd4;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .workspace-name {
+    color: #1d2129;
+    font-size: 14px;
+  }
+
+  .workspace-menu-divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 8px 0;
+  }
 }
 </style>
 

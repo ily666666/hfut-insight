@@ -1,0 +1,511 @@
+[1mdiff --git a/src/platforms/vision/views/monitor/MonitorDashboard.vue b/src/platforms/vision/views/monitor/MonitorDashboard.vue[m
+[1mindex cec7e56..cdacd48 100644[m
+[1m--- a/src/platforms/vision/views/monitor/MonitorDashboard.vue[m
+[1m+++ b/src/platforms/vision/views/monitor/MonitorDashboard.vue[m
+[36m@@ -1,5 +1,4 @@[m
+ <script setup lang="ts">[m
+[31m-import { Icon } from '@iconify/vue';[m
+ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';[m
+ [m
+ const dashboardRef = ref<HTMLElement | null>(null);[m
+[36m@@ -21,7 +20,7 @@[m [mconst timeText = computed(() => {[m
+ });[m
+ [m
+ const fullscreenIcon = computed(() =>[m
+[31m-  isFullscreen.value ? 'mdi:fullscreen-exit' : 'mdi:fullscreen',[m
+[32m+[m[32m  isFullscreen.value ? 'i-mdi-fullscreen-exit' : 'i-mdi-fullscreen',[m
+ );[m
+ [m
+ const fullscreenTitle = computed(() =>[m
+[36m@@ -29,17 +28,17 @@[m [mconst fullscreenTitle = computed(() =>[m
+ );[m
+ [m
+ const equipmentStats = [[m
+[31m-  { icon: 'mdi:monitor-dashboard', label: '设备总数', value: '386个' },[m
+[31m-  { icon: 'mdi:percent-outline', label: '设备在线率', value: '96.4%' },[m
+[31m-  { icon: 'mdi:map-marker-radius-outline', label: '点位总数', value: '312个' },[m
+[31m-  { icon: 'mdi:map-marker-check-outline', label: '点位在线率', value: '94.7%' },[m
+[32m+[m[32m  { icon: 'i-mdi-monitor-dashboard', label: '设备总数', value: '386个' },[m
+[32m+[m[32m  { icon: 'i-mdi-percent-outline', label: '设备在线率', value: '96.4%' },[m
+[32m+[m[32m  { icon: 'i-mdi-map-marker-radius-outline', label: '点位总数', value: '312个' },[m
+[32m+[m[32m  { icon: 'i-mdi-map-marker-check-outline', label: '点位在线率', value: '94.7%' },[m
+ ];[m
+ [m
+ const skillStats = [[m
+[31m-  { icon: 'mdi:clipboard-text-clock-outline', label: '运行计划总数', value: '42个' },[m
+[31m-  { icon: 'mdi:calendar-check-outline', label: '启用计划数', value: '36个' },[m
+[31m-  { icon: 'mdi:creation-outline', label: '已使用技能数', value: '18个' },[m
+[31m-  { icon: 'mdi:map-marker-check-outline', label: '已配置点位数', value: '286个' },[m
+[32m+[m[32m  { icon: 'i-mdi-clipboard-text-clock-outline', label: '运行计划总数', value: '42个' },[m
+[32m+[m[32m  { icon: 'i-mdi-calendar-check-outline', label: '启用计划数', value: '36个' },[m
+[32m+[m[32m  { icon: 'i-mdi-creation-outline', label: '已使用技能数', value: '18个' },[m
+[32m+[m[32m  { icon: 'i-mdi-map-marker-check-outline', label: '已配置点位数', value: '286个' },[m
+ ];[m
+ [m
+ const centerMetrics = [[m
+[36m@@ -133,10 +132,10 @@[m [monBeforeUnmount(() => {[m
+ [m
+       <div class="screen-actions">[m
+         <button class="action-btn" type="button" title="设置数据来源和图表组件">[m
+[31m-          <Icon icon="mdi:cog-outline" />[m
+[32m+[m[32m          <span class="i-mdi-cog-outline" />[m
+         </button>[m
+         <button class="action-btn" type="button" :title="fullscreenTitle" @click="toggleFullscreen">[m
+[31m-          <Icon :icon="fullscreenIcon" />[m
+[32m+[m[32m          <span :class="fullscreenIcon" />[m
+         </button>[m
+       </div>[m
+     </header>[m
+[36m@@ -147,16 +146,16 @@[m [monBeforeUnmount(() => {[m
+           <h2>设备实况</h2>[m
+         </div>[m
+         <div class="stat-grid">[m
+[31m-          <article v-for="item in equipmentStats" :key="item.label" class="stat-item">[m
+[31m-            <div class="stat-icon">[m
+[31m-              <Icon :icon="item.icon" />[m
+[31m-            </div>[m
+[31m-            <div>[m
+[31m-              <div class="stat-label">{{ item.label }}</div>[m
+[31m-              <div class="stat-value">{{ item.value }}</div>[m
+[31m-            </div>[m
+[31m-          </article>[m
+[31m-        </div>[m
+[32m+[m[32m            <article v-for="item in equipmentStats" :key="item.label" class="stat-item">[m
+[32m+[m[32m              <div class="stat-icon-wrap">[m
+[32m+[m[32m                <span :class="['stat-icon', item.icon]" />[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m              <div>[m
+[32m+[m[32m                <div class="stat-label">{{ item.label }}</div>[m
+[32m+[m[32m                <div class="stat-value">{{ item.value }}</div>[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m            </article>[m
+[32m+[m[32m          </div>[m
+       </section>[m
+ [m
+       <section class="dashboard-card card-center-top">[m
+[36m@@ -167,7 +166,7 @@[m [monBeforeUnmount(() => {[m
+           <div class="event-preview">[m
+             <div class="center-insight">[m
+               <div class="insight-orbit">[m
+[31m-                <Icon icon="mdi:video-wireless-outline" />[m
+[32m+[m[32m                <span class="i-mdi-video-wireless-outline" />[m
+                 <span>云边协同识别中</span>[m
+               </div>[m
+               <div class="center-metrics">[m
+[36m@@ -268,7 +267,7 @@[m [monBeforeUnmount(() => {[m
+         <div class="stat-grid">[m
+           <article v-for="item in skillStats" :key="item.label" class="stat-item">[m
+             <div class="stat-icon">[m
+[31m-              <Icon :icon="item.icon" />[m
+[32m+[m[32m              <span :class="item.icon" />[m
+             </div>[m
+             <div>[m
+               <div class="stat-label">{{ item.label }}</div>[m
+[1mdiff --git a/src/shared/components/layout/SecondarySidebar.vue b/src/shared/components/layout/SecondarySidebar.vue[m
+[1mindex 0be54f4..4158ac8 100644[m
+[1m--- a/src/shared/components/layout/SecondarySidebar.vue[m
+[1m+++ b/src/shared/components/layout/SecondarySidebar.vue[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-﻿<script setup lang="ts">[m
+[32m+[m[32m<script setup lang="ts">[m
+ import { computed, ref, watch } from 'vue';[m
+ import { Icon } from '@iconify/vue';[m
+ import { useRoute, useRouter } from 'vue-router';[m
+[36m@@ -15,11 +15,17 @@[m [mconst router = useRouter();[m
+ const activeKey = computed(() => route.meta.secondary as string | undefined);[m
+ const expandedKeys = ref<Set<string>>(new Set());[m
+ const collapsed = ref(false);[m
+[32m+[m[32mconst dropdownVisible = ref(false);[m
+ [m
+ function toggleCollapse() {[m
+   collapsed.value = !collapsed.value;[m
+ }[m
+ [m
+[32m+[m[32mfunction handleCreateWorkspace() {[m
+[32m+[m[32m  dropdownVisible.value = false;[m
+[32m+[m[32m  // TODO: Navigate or open modal[m
+[32m+[m[32m}[m
+[32m+[m
+ function isLeaf(item: SecondaryMenuItem): boolean {[m
+   return !item.children?.length;[m
+ }[m
+[36m@@ -82,10 +88,34 @@[m [mfunction handleNavigate(item: SecondaryMenuItem) {[m
+     <aside class="secondary-sidebar">[m
+       <div class="title">{{ config.title }}</div>[m
+ [m
+[31m-      <button v-if="config.contextLabel" class="context-chip" type="button">[m
+[31m-        <span>{{ config.contextLabel }}</span>[m
+[31m-        <Icon icon="mdi:chevron-down" />[m
+[31m-      </button>[m
+[32m+[m[32m      <a-dropdown v-if="config.contextLabel" v-model:open="dropdownVisible" :trigger="['click']" placement="bottom" overlayClassName="workspace-dropdown">[m
+[32m+[m[32m        <button class="context-chip" type="button" :class="{ 'is-open': dropdownVisible }">[m
+[32m+[m[32m          <div class="context-chip-left">[m
+[32m+[m[32m            <div class="workspace-icon">[m
+[32m+[m[32m              <Icon icon="mdi:account" />[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <span class="workspace-divider"></span>[m
+[32m+[m[32m            <span class="workspace-name">{{ config.contextLabel }}</span>[m
+[32m+[m[32m          </div>[m
+[32m+[m[32m          <Icon :icon="dropdownVisible ? 'mdi:chevron-up' : 'mdi:chevron-down'" style="color: #86909c;" />[m
+[32m+[m[32m        </button>[m
+[32m+[m[32m        <template #overlay>[m
+[32m+[m[32m          <div class="workspace-dropdown-panel">[m
+[32m+[m[32m            <div class="workspace-menu-item is-active">[m
+[32m+[m[32m              <div class="workspace-icon">[m
+[32m+[m[32m                <Icon icon="mdi:account" />[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m              <span class="workspace-name">默认空间</span>[m
+[32m+[m[32m              <Icon icon="mdi:check" class="check-icon" />[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <div class="workspace-menu-divider"></div>[m
+[32m+[m[32m            <div class="workspace-menu-item create-btn" @click="handleCreateWorkspace">[m
+[32m+[m[32m              <Icon icon="mdi:plus" />[m
+[32m+[m[32m              <span>创建工作空间</span>[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m          </div>[m
+[32m+[m[32m        </template>[m
+[32m+[m[32m      </a-dropdown>[m
+ [m
+       <ul class="menu" role="menu">[m
+         <SecondaryMenuTreeNode[m
+[36m@@ -196,15 +226,131 @@[m [mfunction handleNavigate(item: SecondaryMenuItem) {[m
+   margin: 0 14px 16px;[m
+   height: 40px;[m
+   border: 1px solid rgba(36, 104, 242, 0.12);[m
+[31m-  border-radius: 14px;[m
+[31m-  background: rgba(255, 255, 255, 0.82);[m
+[31m-  color: #55617e;[m
+[32m+[m[32m  border-radius: 8px;[m
+[32m+[m[32m  background: #fff;[m
+[32m+[m[32m  color: #1d2129;[m
+   display: flex;[m
+   align-items: center;[m
+   justify-content: space-between;[m
+[31m-  padding: 0 14px;[m
+[32m+[m[32m  padding: 0 12px;[m
+   font-size: 14px;[m
+[31m-  font-weight: 600;[m
+[32m+[m[32m  font-weight: 400;[m
+[32m+[m[32m  cursor: pointer;[m
+[32m+[m[32m  transition: all 0.2s;[m
+[32m+[m
+[32m+[m[32m  &.is-open,[m
+[32m+[m[32m  &:hover {[m
+[32m+[m[32m    border-color: #1677ff;[m
+[32m+[m[32m    color: #1677ff;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .context-chip-left {[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    gap: 8px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-icon {[m
+[32m+[m[32m    width: 20px;[m
+[32m+[m[32m    height: 20px;[m
+[32m+[m[32m    border-radius: 4px;[m
+[32m+[m[32m    background: #1677ff;[m
+[32m+[m[32m    color: #fff;[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    justify-content: center;[m
+[32m+[m[32m    font-size: 12px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-divider {[m
+[32m+[m[32m    width: 1px;[m
+[32m+[m[32m    height: 12px;[m
+[32m+[m[32m    background: #e5e6eb;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-name {[m
+[32m+[m[32m    color: #1d2129;[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m:global(.workspace-dropdown) {[m
+[32m+[m[32m  .workspace-dropdown-panel {[m
+[32m+[m[32m    background: #fff;[m
+[32m+[m[32m    border-radius: 8px;[m
+[32m+[m[32m    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);[m
+[32m+[m[32m    padding: 8px;[m
+[32m+[m[32m    min-width: 186px;[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    flex-direction: column;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-menu-item {[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    padding: 8px 12px;[m
+[32m+[m[32m    border-radius: 6px;[m
+[32m+[m[32m    cursor: pointer;[m
+[32m+[m[32m    transition: background-color 0.2s;[m
+[32m+[m[32m    gap: 8px;[m
+[32m+[m
+[32m+[m[32m    &:hover {[m
+[32m+[m[32m      background-color: #f2f3f5;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    &.is-active {[m
+[32m+[m[32m      background-color: #e8f3ff;[m
+[32m+[m[41m      [m
+[32m+[m[32m      .workspace-icon {[m
+[32m+[m[32m        background-color: #1677ff;[m
+[32m+[m[32m        color: #fff;[m
+[32m+[m[32m      }[m
+[32m+[m[41m      [m
+[32m+[m[32m      .workspace-name {[m
+[32m+[m[32m        color: #1677ff;[m
+[32m+[m[32m        font-weight: 500;[m
+[32m+[m[32m      }[m
+[32m+[m[41m      [m
+[32m+[m[32m      .check-icon {[m
+[32m+[m[32m        color: #1677ff;[m
+[32m+[m[32m        font-size: 16px;[m
+[32m+[m[32m        margin-left: auto;[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    &.create-btn {[m
+[32m+[m[32m      justify-content: center;[m
+[32m+[m[32m      color: #1677ff;[m
+[32m+[m[32m      font-weight: 500;[m
+[32m+[m[32m      font-size: 14px;[m
+[32m+[m[41m      [m
+[32m+[m[32m      &:hover {[m
+[32m+[m[32m        background-color: #f2f3f5;[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-icon {[m
+[32m+[m[32m    width: 20px;[m
+[32m+[m[32m    height: 20px;[m
+[32m+[m[32m    border-radius: 4px;[m
+[32m+[m[32m    background: #c9cdd4;[m
+[32m+[m[32m    color: #fff;[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    justify-content: center;[m
+[32m+[m[32m    font-size: 12px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-name {[m
+[32m+[m[32m    color: #1d2129;[m
+[32m+[m[32m    font-size: 14px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-menu-divider {[m
+[32m+[m[32m    height: 1px;[m
+[32m+[m[32m    background-color: #f0f0f0;[m
+[32m+[m[32m    margin: 8px 0;[m
+[32m+[m[32m  }[m
+ }[m
+ [m
+ .menu {[m
+[1mdiff --git a/src/shared/components/layout/SecondarySidebar.vue b/src/shared/components/layout/SecondarySidebar.vue[m
+[1mindex 0be54f4..4158ac8 100644[m
+[1m--- a/src/shared/components/layout/SecondarySidebar.vue[m
+[1m+++ b/src/shared/components/layout/SecondarySidebar.vue[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-﻿<script setup lang="ts">[m
+[32m+[m[32m<script setup lang="ts">[m
+ import { computed, ref, watch } from 'vue';[m
+ import { Icon } from '@iconify/vue';[m
+ import { useRoute, useRouter } from 'vue-router';[m
+[36m@@ -15,11 +15,17 @@[m [mconst router = useRouter();[m
+ const activeKey = computed(() => route.meta.secondary as string | undefined);[m
+ const expandedKeys = ref<Set<string>>(new Set());[m
+ const collapsed = ref(false);[m
+[32m+[m[32mconst dropdownVisible = ref(false);[m
+ [m
+ function toggleCollapse() {[m
+   collapsed.value = !collapsed.value;[m
+ }[m
+ [m
+[32m+[m[32mfunction handleCreateWorkspace() {[m
+[32m+[m[32m  dropdownVisible.value = false;[m
+[32m+[m[32m  // TODO: Navigate or open modal[m
+[32m+[m[32m}[m
+[32m+[m
+ function isLeaf(item: SecondaryMenuItem): boolean {[m
+   return !item.children?.length;[m
+ }[m
+[36m@@ -82,10 +88,34 @@[m [mfunction handleNavigate(item: SecondaryMenuItem) {[m
+     <aside class="secondary-sidebar">[m
+       <div class="title">{{ config.title }}</div>[m
+ [m
+[31m-      <button v-if="config.contextLabel" class="context-chip" type="button">[m
+[31m-        <span>{{ config.contextLabel }}</span>[m
+[31m-        <Icon icon="mdi:chevron-down" />[m
+[31m-      </button>[m
+[32m+[m[32m      <a-dropdown v-if="config.contextLabel" v-model:open="dropdownVisible" :trigger="['click']" placement="bottom" overlayClassName="workspace-dropdown">[m
+[32m+[m[32m        <button class="context-chip" type="button" :class="{ 'is-open': dropdownVisible }">[m
+[32m+[m[32m          <div class="context-chip-left">[m
+[32m+[m[32m            <div class="workspace-icon">[m
+[32m+[m[32m              <Icon icon="mdi:account" />[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <span class="workspace-divider"></span>[m
+[32m+[m[32m            <span class="workspace-name">{{ config.contextLabel }}</span>[m
+[32m+[m[32m          </div>[m
+[32m+[m[32m          <Icon :icon="dropdownVisible ? 'mdi:chevron-up' : 'mdi:chevron-down'" style="color: #86909c;" />[m
+[32m+[m[32m        </button>[m
+[32m+[m[32m        <template #overlay>[m
+[32m+[m[32m          <div class="workspace-dropdown-panel">[m
+[32m+[m[32m            <div class="workspace-menu-item is-active">[m
+[32m+[m[32m              <div class="workspace-icon">[m
+[32m+[m[32m                <Icon icon="mdi:account" />[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m              <span class="workspace-name">默认空间</span>[m
+[32m+[m[32m              <Icon icon="mdi:check" class="check-icon" />[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <div class="workspace-menu-divider"></div>[m
+[32m+[m[32m            <div class="workspace-menu-item create-btn" @click="handleCreateWorkspace">[m
+[32m+[m[32m              <Icon icon="mdi:plus" />[m
+[32m+[m[32m              <span>创建工作空间</span>[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m          </div>[m
+[32m+[m[32m        </template>[m
+[32m+[m[32m      </a-dropdown>[m
+ [m
+       <ul class="menu" role="menu">[m
+         <SecondaryMenuTreeNode[m
+[36m@@ -196,15 +226,131 @@[m [mfunction handleNavigate(item: SecondaryMenuItem) {[m
+   margin: 0 14px 16px;[m
+   height: 40px;[m
+   border: 1px solid rgba(36, 104, 242, 0.12);[m
+[31m-  border-radius: 14px;[m
+[31m-  background: rgba(255, 255, 255, 0.82);[m
+[31m-  color: #55617e;[m
+[32m+[m[32m  border-radius: 8px;[m
+[32m+[m[32m  background: #fff;[m
+[32m+[m[32m  color: #1d2129;[m
+   display: flex;[m
+   align-items: center;[m
+   justify-content: space-between;[m
+[31m-  padding: 0 14px;[m
+[32m+[m[32m  padding: 0 12px;[m
+   font-size: 14px;[m
+[31m-  font-weight: 600;[m
+[32m+[m[32m  font-weight: 400;[m
+[32m+[m[32m  cursor: pointer;[m
+[32m+[m[32m  transition: all 0.2s;[m
+[32m+[m
+[32m+[m[32m  &.is-open,[m
+[32m+[m[32m  &:hover {[m
+[32m+[m[32m    border-color: #1677ff;[m
+[32m+[m[32m    color: #1677ff;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .context-chip-left {[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    gap: 8px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-icon {[m
+[32m+[m[32m    width: 20px;[m
+[32m+[m[32m    height: 20px;[m
+[32m+[m[32m    border-radius: 4px;[m
+[32m+[m[32m    background: #1677ff;[m
+[32m+[m[32m    color: #fff;[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    justify-content: center;[m
+[32m+[m[32m    font-size: 12px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-divider {[m
+[32m+[m[32m    width: 1px;[m
+[32m+[m[32m    height: 12px;[m
+[32m+[m[32m    background: #e5e6eb;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-name {[m
+[32m+[m[32m    color: #1d2129;[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m:global(.workspace-dropdown) {[m
+[32m+[m[32m  .workspace-dropdown-panel {[m
+[32m+[m[32m    background: #fff;[m
+[32m+[m[32m    border-radius: 8px;[m
+[32m+[m[32m    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);[m
+[32m+[m[32m    padding: 8px;[m
+[32m+[m[32m    min-width: 186px;[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    flex-direction: column;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-menu-item {[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    padding: 8px 12px;[m
+[32m+[m[32m    border-radius: 6px;[m
+[32m+[m[32m    cursor: pointer;[m
+[32m+[m[32m    transition: background-color 0.2s;[m
+[32m+[m[32m    gap: 8px;[m
+[32m+[m
+[32m+[m[32m    &:hover {[m
+[32m+[m[32m      background-color: #f2f3f5;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    &.is-active {[m
+[32m+[m[32m      background-color: #e8f3ff;[m
+[32m+[m[41m      [m
+[32m+[m[32m      .workspace-icon {[m
+[32m+[m[32m        background-color: #1677ff;[m
+[32m+[m[32m        color: #fff;[m
+[32m+[m[32m      }[m
+[32m+[m[41m      [m
+[32m+[m[32m      .workspace-name {[m
+[32m+[m[32m        color: #1677ff;[m
+[32m+[m[32m        font-weight: 500;[m
+[32m+[m[32m      }[m
+[32m+[m[41m      [m
+[32m+[m[32m      .check-icon {[m
+[32m+[m[32m        color: #1677ff;[m
+[32m+[m[32m        font-size: 16px;[m
+[32m+[m[32m        margin-left: auto;[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    &.create-btn {[m
+[32m+[m[32m      justify-content: center;[m
+[32m+[m[32m      color: #1677ff;[m
+[32m+[m[32m      font-weight: 500;[m
+[32m+[m[32m      font-size: 14px;[m
+[32m+[m[41m      [m
+[32m+[m[32m      &:hover {[m
+[32m+[m[32m        background-color: #f2f3f5;[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-icon {[m
+[32m+[m[32m    width: 20px;[m
+[32m+[m[32m    height: 20px;[m
+[32m+[m[32m    border-radius: 4px;[m
+[32m+[m[32m    background: #c9cdd4;[m
+[32m+[m[32m    color: #fff;[m
+[32m+[m[32m    display: flex;[m
+[32m+[m[32m    align-items: center;[m
+[32m+[m[32m    justify-content: center;[m
+[32m+[m[32m    font-size: 12px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-name {[m
+[32m+[m[32m    color: #1d2129;[m
+[32m+[m[32m    font-size: 14px;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  .workspace-menu-divider {[m
+[32m+[m[32m    height: 1px;[m
+[32m+[m[32m    background-color: #f0f0f0;[m
+[32m+[m[32m    margin: 8px 0;[m
+[32m+[m[32m  }[m
+ }[m
+ [m
+ .menu {[m
